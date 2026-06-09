@@ -231,10 +231,10 @@ input,select,button,textarea{font-family:var(--font)}
       <div class="field-row">
         <div class="field"><label>Créditos iniciais</label>
           <select id="c-cred">
-            <option value="9">9 — 2×/sem</option>
-            <option value="13">13 — 3×/sem</option>
-            <option value="17">17 — 4×/sem</option>
-            <option value="21">21 — 5×/sem</option>
+            <option value="9">9 créditos (2×/sem)</option>
+            <option value="13">13 créditos (3×/sem)</option>
+            <option value="17">17 créditos (4×/sem)</option>
+            <option value="21">21 créditos (5×/sem)</option>
           </select>
         </div>
         <div class="field"><label>Pagamento</label>
@@ -750,7 +750,7 @@ async function initClienteView(){
   document.getElementById('cli-avatar').textContent=iniciais(c.nome);
   document.getElementById('cli-nome-hdr').textContent=c.nome;
   document.getElementById('cli-info-hdr').textContent=PAG_LABEL[c.pagamento]+(c.telefone?' · '+c.telefone:'');
-  const op=FREQ_OPCOES.slice().reverse().find(o=>c.creditos>=o.cred);
+  const op=FREQ_OPCOES.filter(o=>c.creditos>=o.cred).slice(-1)[0];
   myFreq=op?op.freq:2;
   renderFreqGrid();
   renderHoraSel();
@@ -782,13 +782,20 @@ async function carregarAgendamentos(){
 function renderFreqGrid(){
   const g=document.getElementById('freq-grid');g.innerHTML='';
   FREQ_OPCOES.forEach(op=>{
-    const ok=creditos()>=op.cred;
+    // Só libera a frequência se o cliente tiver créditos >= mínimo daquela faixa
+    const ok=currentUser.creditos>=op.cred;
     const b=document.createElement('button');
     b.className='freq-btn'+(op.freq===myFreq?' sel':'');
-    b.disabled=!ok;b.textContent=op.label;b.title=op.cred+' créditos';
+    b.disabled=!ok;b.textContent=op.label;b.title=ok?op.cred+' créditos necessários':'Créditos insuficientes (necessário: '+op.cred+')';
     b.onclick=()=>{if(ok){myFreq=op.freq;renderFreqGrid();}};
     g.appendChild(b);
   });
+  // Se a freq atual não é mais válida, ajusta para a maior possível
+  const maxOp=FREQ_OPCOES.filter(o=>currentUser.creditos>=o.cred).slice(-1)[0];
+  if(maxOp&&!FREQ_OPCOES.find(o=>o.freq===myFreq&&currentUser.creditos>=o.cred)){
+    myFreq=maxOp.freq;
+    g.querySelectorAll('.freq-btn').forEach((b,i)=>{b.classList.toggle('sel',FREQ_OPCOES[i].freq===myFreq);});
+  }
 }
 
 function renderHoraSel(){
@@ -912,12 +919,13 @@ function renderGridCliente(){
     days.forEach(d=>{
       const dk=toKey(d);const sl=getSlot(dk,h);const hol=isHoliday(d);const bl4=isBlocked4h(dk,h);
       if(hol){html+=`<div class="slot holiday"><span style="font-size:8px;color:var(--yellow)">Fer</span></div>`;return;}
-      const hasMine=sl.mineId!==null&&mySchedule.find(s=>s.date===dk&&s.hour===h);
+      const meuAgend=mySchedule.find(s=>s.date===dk&&s.hour===h);
+      const hasMine=!!meuAgend;
       const cls=hasMine?'mine':sl.count>=MAX?'full':'free';
       const semCred=!hasMine&&creditosLivres()<=0;
       const isLocked=hasMine&&bl4;
       let oc='';
-      if(hasMine&&!bl4) oc=` onclick="solicitarCancelamento('${mySchedule.find(s=>s.date===dk&&s.hour===h)?.id}','${dk}',${h})"`;
+      if(hasMine&&!bl4) oc=` onclick="solicitarCancelamento('${meuAgend.id}','${dk}',${h})"`;
       else if(!hasMine&&sl.count<MAX&&!bl4&&!semCred) oc=` onclick="bookSlot('${dk}',${h})"`;
       html+=`<div class="slot ${cls}${isLocked?' locked':''}${semCred?' no-credits':''}"${oc} title="${hasMine?'Toque para cancelar':semCred?'Sem créditos':dk+' '+h+'h'}">${isLocked?'<i class="ti ti-lock" style="font-size:8px"></i>':hasMine?'<i class="ti ti-x" style="font-size:8px;color:var(--red)"></i>':''}<span class="slot-count">${sl.count}/${MAX}</span></div>`;
     });
