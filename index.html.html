@@ -109,7 +109,7 @@ input,select,button{font-family:var(--font)}
 .tab-btn{flex:1;padding:7px;border-radius:var(--radius-xs);border:none;font-size:11px;font-weight:500;cursor:pointer;background:transparent;color:var(--text3);font-family:var(--font);transition:all .15s}
 .tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
 
-/* CRÉDITOS: 2x a 5x = 4 colunas */
+/* CRÃ‰DITOS: 2x a 5x = 4 colunas */
 .freq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
 .freq-btn{padding:8px 4px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:11px;font-weight:500;cursor:pointer;background:var(--bg3);color:var(--text2);text-align:center;font-family:var(--font);transition:all .15s}
 .freq-btn.sel{background:var(--accent-dim2);border-color:var(--accent);color:var(--accent)}
@@ -180,7 +180,7 @@ input,select,button{font-family:var(--font)}
     <div class="login-logo">Reviva<span>.</span></div>
     <div class="login-tagline">Studio de Pilates</div>
     <div class="login-box">
-      <h3>Acesso à agenda</h3>
+      <h3>Acesso Ã  agenda</h3>
       <div class="field">
         <label>Tipo de acesso</label>
         <select id="login-tipo" onchange="loginTipoChange()">
@@ -192,11 +192,11 @@ input,select,button{font-family:var(--font)}
       </div>
       <div id="fields-admin" style="display:none">
         <div class="field"><label>Senha</label>
-          <input type="password" id="admin-senha" placeholder="••••••••••" autocomplete="current-password">
+          <input type="password" id="admin-senha" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password">
         </div>
       </div>
       <div id="fields-colab" style="display:none">
-        <div class="field"><label>Código de acesso</label>
+        <div class="field"><label>CÃ³digo de acesso</label>
           <input type="text" id="colab-codigo" placeholder="COL-001" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
         </div>
         <div class="field"><label>Data de nascimento (senha)</label>
@@ -204,7 +204,7 @@ input,select,button{font-family:var(--font)}
         </div>
       </div>
       <div id="fields-cliente" style="display:none">
-        <div class="field"><label>Código de acesso</label>
+        <div class="field"><label>CÃ³digo de acesso</label>
           <input type="text" id="cli-codigo" placeholder="CLI-001" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
         </div>
         <div class="field"><label>Data de nascimento (senha)</label>
@@ -223,7 +223,7 @@ input,select,button{font-family:var(--font)}
 <div id="topbar" style="display:none" class="topbar">
   <div>
     <div class="logo">Reviva<span>.</span></div>
-    <div class="user-tag" id="user-label">—</div>
+    <div class="user-tag" id="user-label">â€”</div>
   </div>
   <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i> Sair</button>
 </div>
@@ -248,19 +248,19 @@ input,select,button{font-family:var(--font)}
         <div class="field"><label>Telefone</label><input type="tel" id="c-tel" placeholder="(81) 9 0000-0000"></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Créditos</label>
+        <div class="field"><label>CrÃ©ditos</label>
           <select id="c-cred">
-            <option value="9">9 — 2×/sem</option>
-            <option value="13">13 — 3×/sem</option>
-            <option value="17">17 — 4×/sem</option>
-            <option value="21">21 — 5×/sem</option>
+            <option value="9">9 â€” 2Ã—/sem</option>
+            <option value="13">13 â€” 3Ã—/sem</option>
+            <option value="17">17 â€” 4Ã—/sem</option>
+            <option value="21">21 â€” 5Ã—/sem</option>
           </select>
         </div>
         <div class="field"><label>Pagamento</label>
           <select id="c-pag">
             <option value="pix">PIX</option>
-            <option value="debito">Débito</option>
-            <option value="credito">Crédito</option>
+            <option value="debito">DÃ©bito</option>
+            <option value="credito">CrÃ©dito</option>
           </select>
         </div>
       </div>
@@ -281,10 +281,10 @@ input,select,button{font-family:var(--font)}
 
     <div class="card">
       <div class="card-title"><i class="ti ti-users"></i> Clientes <span id="total-cli" style="font-size:11px;font-weight:400;color:var(--text3)"></span></div>
-      <input type="text" id="busca-cli" placeholder="Buscar por nome ou código..." style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--text);outline:none;margin-bottom:10px" oninput="renderTabelaClientes()">
+      <input type="text" id="busca-cli" placeholder="Buscar por nome ou cÃ³digo..." style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--text);outline:none;margin-bottom:10px" oninput="renderTabelaClientes()">
       <div style="overflow-x:auto">
         <table class="data-table"><thead><tr>
-          <th>Código</th><th>Nome</th><th>Créditos</th><th>Pgto.</th><th>Status</th><th></th>
+          <th>CÃ³digo</th><th>Nome</th><th>CrÃ©ditos</th><th>Pgto.</th><th>Status</th><th></th>
         </tr></thead><tbody id="tbody-cli"></tbody></table>
       </div>
     </div>
@@ -303,8 +303,8 @@ input,select,button{font-family:var(--font)}
       </div>
       <div class="field"><label>Turno</label>
         <select id="col-turno">
-          <option value="manha">Manhã (6h–12h)</option>
-          <option value="tarde">Tarde/Noite (14h–20h)</option>
+          <option value="manha">ManhÃ£ (6hâ€“12h)</option>
+          <option value="tarde">Tarde/Noite (14hâ€“20h)</option>
           <option value="todos">Ambos os turnos</option>
         </select>
       </div>
@@ -327,7 +327,7 @@ input,select,button{font-family:var(--font)}
       <div class="card-title"><i class="ti ti-clipboard-check"></i> Colaboradoras <span id="total-col" style="font-size:11px;font-weight:400;color:var(--text3)"></span></div>
       <div style="overflow-x:auto">
         <table class="data-table"><thead><tr>
-          <th>Código</th><th>Nome</th><th>Turno</th><th>Status</th><th></th>
+          <th>CÃ³digo</th><th>Nome</th><th>Turno</th><th>Status</th><th></th>
         </tr></thead><tbody id="tbody-col"></tbody></table>
       </div>
     </div>
@@ -346,10 +346,10 @@ input,select,button{font-family:var(--font)}
     </div>
   </div>
   <div class="card">
-    <div class="card-title"><i class="ti ti-repeat"></i> Frequência semanal</div>
+    <div class="card-title"><i class="ti ti-repeat"></i> FrequÃªncia semanal</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <span style="background:var(--accent-dim2);color:var(--accent);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500" id="credits-badge">— créditos</span>
-      <span style="font-size:11px;color:var(--text3)">disponíveis</span>
+      <span style="background:var(--accent-dim2);color:var(--accent);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500" id="credits-badge">â€” crÃ©ditos</span>
+      <span style="font-size:11px;color:var(--text3)">disponÃ­veis</span>
     </div>
     <div class="freq-grid" id="freq-grid"></div>
     <div class="days-row" id="days-row">
@@ -362,13 +362,13 @@ input,select,button{font-family:var(--font)}
     <div class="field-row">
       <div class="field" style="margin-bottom:0"><label>Turno</label>
         <select id="turno-sel" onchange="renderHoraSel()">
-          <option value="manha">Manhã — Thayane</option>
-          <option value="tarde">Tarde — Rebeka</option>
+          <option value="manha">ManhÃ£ â€” Thayane</option>
+          <option value="tarde">Tarde â€” Rebeka</option>
         </select>
       </div>
-      <div class="field" style="margin-bottom:0"><label>Horário</label><select id="hora-sel"></select></div>
+      <div class="field" style="margin-bottom:0"><label>HorÃ¡rio</label><select id="hora-sel"></select></div>
     </div>
-    <button class="btn primary full" onclick="salvarFrequencia()" style="margin-top:10px"><i class="ti ti-check"></i> Salvar frequência</button>
+    <button class="btn primary full" onclick="salvarFrequencia()" style="margin-top:10px"><i class="ti ti-check"></i> Salvar frequÃªncia</button>
     <div id="freq-msg"></div>
   </div>
   <div class="card">
@@ -380,7 +380,7 @@ input,select,button{font-family:var(--font)}
       <button class="btn sm" onclick="navSemana(1,'cli')"><i class="ti ti-arrow-right"></i></button>
     </div>
     <div class="legend">
-      <div class="leg"><div class="leg-dot" style="background:var(--green-dim);border:0.5px solid rgba(74,222,128,0.3)"></div>Meu horário</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--green-dim);border:0.5px solid rgba(74,222,128,0.3)"></div>Meu horÃ¡rio</div>
       <div class="leg"><div class="leg-dot" style="background:var(--red-dim)"></div>Lotado</div>
       <div class="leg"><div class="leg-dot" style="background:var(--yellow-dim)"></div>Feriado</div>
       <div class="leg"><div class="leg-dot" style="background:var(--bg3)"></div>Livre</div>
@@ -391,7 +391,7 @@ input,select,button{font-family:var(--font)}
   </div>
 </div>
 
-<!-- PRESENÇAS -->
+<!-- PRESENÃ‡AS -->
 <div id="screen-presencas" class="screen" style="display:none">
   <div class="main">
   <div class="stat-grid" id="stat-grid"></div>
@@ -401,7 +401,7 @@ input,select,button{font-family:var(--font)}
     <button class="btn sm" onclick="navSemana(1,'col')"><i class="ti ti-arrow-right"></i></button>
   </div>
   <div class="card">
-    <div class="card-title"><i class="ti ti-clipboard-list"></i> Registro de presença</div>
+    <div class="card-title"><i class="ti ti-clipboard-list"></i> Registro de presenÃ§a</div>
     <div style="overflow-x:auto">
       <table class="data-table">
         <thead><tr><th>Data</th><th>Hora</th><th>Inst.</th><th>Alunos</th><th>Aluno</th><th>Instrutora</th></tr></thead>
@@ -424,12 +424,12 @@ input,select,button{font-family:var(--font)}
       <div class="field" style="margin-bottom:0"><label>Data</label><input type="date" id="avail-date"></div>
       <div class="field" style="margin-bottom:0"><label>Turno</label>
         <select id="avail-turno" onchange="renderAvailHoras()">
-          <option value="manha">Manhã — Thayane</option>
-          <option value="tarde">Tarde — Rebeka</option>
+          <option value="manha">ManhÃ£ â€” Thayane</option>
+          <option value="tarde">Tarde â€” Rebeka</option>
         </select>
       </div>
     </div>
-    <div class="field" style="margin-top:10px"><label>Horário</label><select id="avail-hora"></select></div>
+    <div class="field" style="margin-top:10px"><label>HorÃ¡rio</label><select id="avail-hora"></select></div>
     <button class="btn primary full" onclick="verificarVaga()" style="margin-top:4px"><i class="ti ti-search"></i> Verificar</button>
     <div id="avail-result"></div>
   </div>
@@ -453,14 +453,14 @@ input,select,button{font-family:var(--font)}
 <!-- BOTTOM NAV -->
 <div class="bottom-nav" id="bottom-nav">
   <button class="nav-btn" id="nav-agenda" onclick="setMode('agenda')" style="display:none"><i class="ti ti-calendar"></i>Agenda</button>
-  <button class="nav-btn" id="nav-presencas" onclick="setMode('presencas')" style="display:none"><i class="ti ti-clipboard-check"></i>Presenças</button>
+  <button class="nav-btn" id="nav-presencas" onclick="setMode('presencas')" style="display:none"><i class="ti ti-clipboard-check"></i>PresenÃ§as</button>
   <button class="nav-btn" id="nav-cadastros" onclick="setMode('cadastros')" style="display:none"><i class="ti ti-users"></i>Cadastros</button>
   <button class="nav-btn" id="nav-vagas" onclick="setMode('vagas')"><i class="ti ti-search"></i>Vagas</button>
 </div>
 </div>
 
 <script>
-// ── SUPABASE CONFIG ──
+// â”€â”€ SUPABASE CONFIG â”€â”€
 const SB_URL='https://lnmwcjywxszijrbguxaj.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubXdjanl3eHN6aWpyYmd1eGFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzE3NTAsImV4cCI6MjA5NjM0Nzc1MH0.pjj_HsDcOeNybYzSSFiIP1YDYxQqjRXh9JaTv-emA9c';
 
@@ -484,26 +484,26 @@ async function sbUpsert(table,body){
   return r.json();
 }
 
-// ── CONSTANTES ──
+// â”€â”€ CONSTANTES â”€â”€
 const MAX=4;
 const HORAS_MANHA=[6,7,8,9,10,11,12];
 const HORAS_TARDE=[14,15,16,17,18,19,20];
 const ALL_HORAS=[...HORAS_MANHA,...HORAS_TARDE];
 const FERIADOS=new Set(['2025-01-01','2025-04-18','2025-04-21','2025-05-01','2025-06-19','2025-09-07','2025-10-12','2025-11-02','2025-11-15','2025-11-20','2025-12-25','2026-01-01','2026-04-03','2026-04-21','2026-05-01','2026-06-04','2026-09-07','2026-10-12','2026-11-02','2026-11-15','2026-11-20','2026-12-25']);
-const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','SÃ¡b'];
 const ADMIN_SENHA='Reviv4pilates';
 const NETLIFY='https://elegant-raindrop-58da8d.netlify.app';
-const TURNO_LABEL={manha:'Manhã',tarde:'Tarde',todos:'Ambos'};
-const PAG_LABEL={pix:'PIX',debito:'Débito',credito:'Crédito'};
+const TURNO_LABEL={manha:'ManhÃ£',tarde:'Tarde',todos:'Ambos'};
+const PAG_LABEL={pix:'PIX',debito:'DÃ©bito',credito:'CrÃ©dito'};
 const PAG_CLS={pix:'pix',debito:'debito',credito:'credito'};
 const TURNO_CLS={manha:'manha',tarde:'tarde',todos:'admin'};
 
-// Créditos: 2x=9, 3x=13, 4x=17, 5x=21
+// CrÃ©ditos: 2x=9, 3x=13, 4x=17, 5x=21
 const FREQ_OPCOES=[
-  {freq:2,cred:9,label:'2×/sem'},
-  {freq:3,cred:13,label:'3×/sem'},
-  {freq:4,cred:17,label:'4×/sem'},
-  {freq:5,cred:21,label:'5×/sem'},
+  {freq:2,cred:9,label:'2Ã—/sem'},
+  {freq:3,cred:13,label:'3Ã—/sem'},
+  {freq:4,cred:17,label:'4Ã—/sem'},
+  {freq:5,cred:21,label:'5Ã—/sem'},
 ];
 
 let currentUser=null;
@@ -515,21 +515,21 @@ let myFreq=2;
 let cliCounter=1;
 let colCounter=1;
 
-// ── HELPERS ──
+// â”€â”€ HELPERS â”€â”€
 function toKey(d){return d.toISOString().slice(0,10)}
 function isHoliday(d){return FERIADOS.has(toKey(d))}
 function isWeekend(d){return d.getDay()===0||d.getDay()===6}
 function getSlot(dk,h){const k=dk+'_'+h;if(!slots[k])slots[k]={count:0,names:[]};return slots[k]}
 function isBlocked4h(dk,h){const now=new Date();const t=new Date(dk+'T'+String(h).padStart(2,'0')+':00:00');return(t-now)<4*3600*1000}
 function getWeekMon(off){const now=new Date();const day=now.getDay();const diff=now.getDate()-(day===0?6:day-1);const mon=new Date(now);mon.setDate(diff+off*7);mon.setHours(0,0,0,0);return mon;}
-function fmtWeek(mon){const fri=new Date(mon);fri.setDate(fri.getDate()+4);return mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+fri.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtWeek(mon){const fri=new Date(mon);fri.setDate(fri.getDate()+4);return mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' â€“ '+fri.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});}
 function iniciais(n){return n.trim().split(' ').filter(Boolean).map(p=>p[0]).join('').toUpperCase().slice(0,2);}
 function fmtNasc(nasc){if(!nasc)return '';const p=nasc.split('-');return p.length===3?p[2]+p[1]+p[0]:nasc.replace(/\D/g,'');}
 function h4t(t){return t==='manha'?HORAS_MANHA:t==='tarde'?HORAS_TARDE:ALL_HORAS;}
 function loading(show,txt='Aguarde...'){document.getElementById('loading').style.display=show?'flex':'none';document.getElementById('loading-text').textContent=txt;}
 function showMsg(id,txt,type){const el=document.getElementById(id);if(el)el.innerHTML=txt?`<div class="alert ${type}">${txt}</div>`:'';}
 
-// Gera código sequencial lendo contador do Supabase
+// Gera cÃ³digo sequencial lendo contador do Supabase
 async function gerarCodigoCli(){
   const rows=await sbGet('clientes','select=codigo&order=created_at.desc&limit=1');
   if(rows&&rows.length>0){
@@ -547,7 +547,7 @@ async function gerarCodigoCol(){
   return 'COL-001';
 }
 
-// ── LOGIN ──
+// â”€â”€ LOGIN â”€â”€
 function loginTipoChange(){
   const v=document.getElementById('login-tipo').value;
   document.getElementById('fields-admin').style.display=v==='admin'?'block':'none';
@@ -563,31 +563,31 @@ async function fazerLogin(){
     if(tipo==='admin'){
       if(document.getElementById('admin-senha').value!==ADMIN_SENHA){showMsg('login-msg','Senha incorreta.','err');return;}
       currentUser={tipo:'admin',nome:'Reviva'};
-      document.getElementById('user-label').textContent='Reviva — administradora';
+      document.getElementById('user-label').textContent='Reviva â€” administradora';
       showNav(['nav-cadastros','nav-presencas','nav-vagas']);
       abrirApp('cadastros');
     } else if(tipo==='colaborador'){
       const cod=document.getElementById('colab-codigo').value.trim().toUpperCase();
       const nasc=document.getElementById('colab-nasc-login').value;
-      if(!cod||!nasc){showMsg('login-msg','Preencha código e data de nascimento.','err');return;}
+      if(!cod||!nasc){showMsg('login-msg','Preencha cÃ³digo e data de nascimento.','err');return;}
       const rows=await sbGet('colaboradoras',`codigo=eq.${cod}&ativo=eq.true`);
-      if(!rows||rows.length===0){showMsg('login-msg','Código não encontrado ou colaboradora inativa.','err');return;}
+      if(!rows||rows.length===0){showMsg('login-msg','CÃ³digo nÃ£o encontrado ou colaboradora inativa.','err');return;}
       const col=rows[0];
       if(fmtNasc(col.nascimento)!==fmtNasc(nasc)){showMsg('login-msg','Data de nascimento incorreta.','err');return;}
       currentUser={tipo:'colaborador',...col};
-      document.getElementById('user-label').textContent=col.nome+' — '+TURNO_LABEL[col.turno];
+      document.getElementById('user-label').textContent=col.nome+' â€” '+TURNO_LABEL[col.turno];
       showNav(['nav-presencas','nav-vagas']);
       abrirApp('presencas');
     } else {
       const cod=document.getElementById('cli-codigo').value.trim().toUpperCase();
       const nasc=document.getElementById('cli-nasc-login').value;
-      if(!cod||!nasc){showMsg('login-msg','Preencha código e data de nascimento.','err');return;}
+      if(!cod||!nasc){showMsg('login-msg','Preencha cÃ³digo e data de nascimento.','err');return;}
       const rows=await sbGet('clientes',`codigo=eq.${cod}&ativo=eq.true`);
-      if(!rows||rows.length===0){showMsg('login-msg','Código não encontrado ou cliente inativo.','err');return;}
+      if(!rows||rows.length===0){showMsg('login-msg','CÃ³digo nÃ£o encontrado ou cliente inativo.','err');return;}
       const cli=rows[0];
       if(fmtNasc(cli.nascimento)!==fmtNasc(nasc)){showMsg('login-msg','Data de nascimento incorreta.','err');return;}
       currentUser={tipo:'cliente',...cli};
-      document.getElementById('user-label').textContent=cli.nome+' — '+cli.creditos+' créditos';
+      document.getElementById('user-label').textContent=cli.nome+' â€” '+cli.creditos+' crÃ©ditos';
       showNav(['nav-agenda','nav-vagas']);
       await initClienteView();
     }
@@ -653,12 +653,12 @@ function switchTab(tab){
   });
 }
 
-// ── CADASTRO CLIENTE ──
+// â”€â”€ CADASTRO CLIENTE â”€â”€
 async function cadastrarCliente(){
   const nome=document.getElementById('c-nome').value.trim();
   const cpf=document.getElementById('c-cpf').value.trim();
   const nasc=document.getElementById('c-nasc').value;
-  if(!nome||!cpf||!nasc){showMsg('msg-cad-cli','Nome, CPF e nascimento são obrigatórios.','err');return;}
+  if(!nome||!cpf||!nasc){showMsg('msg-cad-cli','Nome, CPF e nascimento sÃ£o obrigatÃ³rios.','err');return;}
   loading(true,'Cadastrando cliente...');
   try{
     const codigo=await gerarCodigoCli();
@@ -666,7 +666,7 @@ async function cadastrarCliente(){
     const res=await sbPost('clientes',body);
     if(res&&res[0]){
       ['c-nome','c-cpf','c-nasc','c-tel'].forEach(id=>document.getElementById(id).value='');
-      showMsg('msg-cad-cli','Cadastrado! Código: '+codigo,'ok');
+      showMsg('msg-cad-cli','Cadastrado! CÃ³digo: '+codigo,'ok');
       mostrarLinkCli(res[0]);
       renderTabelaClientes();
     } else {
@@ -678,7 +678,7 @@ async function cadastrarCliente(){
 function mostrarLinkCli(cli){
   const link=NETLIFY+'/?c='+cli.codigo;
   document.getElementById('link-modal-cli').style.display='block';
-  document.getElementById('link-cli-label').textContent=cli.nome+' · '+cli.codigo+' · '+cli.creditos+' créditos';
+  document.getElementById('link-cli-label').textContent=cli.nome+' Â· '+cli.codigo+' Â· '+cli.creditos+' crÃ©ditos';
   document.getElementById('link-cli-box').textContent=link;
 }
 
@@ -715,12 +715,12 @@ async function excluirCli(id){
   renderTabelaClientes();
 }
 
-// ── CADASTRO COLABORADORA ──
+// â”€â”€ CADASTRO COLABORADORA â”€â”€
 async function cadastrarColaboradora(){
   const nome=document.getElementById('col-nome').value.trim();
   const cpf=document.getElementById('col-cpf').value.trim();
   const nasc=document.getElementById('col-nasc').value;
-  if(!nome||!cpf||!nasc){showMsg('msg-cad-col','Nome, CPF e nascimento são obrigatórios.','err');return;}
+  if(!nome||!cpf||!nasc){showMsg('msg-cad-col','Nome, CPF e nascimento sÃ£o obrigatÃ³rios.','err');return;}
   loading(true,'Cadastrando colaboradora...');
   try{
     const codigo=await gerarCodigoCol();
@@ -728,7 +728,7 @@ async function cadastrarColaboradora(){
     const res=await sbPost('colaboradoras',body);
     if(res&&res[0]){
       ['col-nome','col-cpf','col-nasc','col-tel'].forEach(id=>document.getElementById(id).value='');
-      showMsg('msg-cad-col','Cadastrada! Código: '+codigo,'ok');
+      showMsg('msg-cad-col','Cadastrada! CÃ³digo: '+codigo,'ok');
       mostrarLinkCol(res[0]);
       renderTabelaColabs();
     } else {
@@ -740,7 +740,7 @@ async function cadastrarColaboradora(){
 function mostrarLinkCol(col){
   const link=NETLIFY+'/?col='+col.codigo;
   document.getElementById('link-modal-col').style.display='block';
-  document.getElementById('link-col-label').textContent=col.nome+' · '+TURNO_LABEL[col.turno];
+  document.getElementById('link-col-label').textContent=col.nome+' Â· '+TURNO_LABEL[col.turno];
   document.getElementById('link-col-box').textContent=link;
 }
 
@@ -775,14 +775,14 @@ function copiar(boxId,okId){
   }).catch(()=>document.getElementById(okId).textContent='Copie manualmente.');
 }
 
-// ── AGENDA CLIENTE ──
+// â”€â”€ AGENDA CLIENTE â”€â”€
 async function initClienteView(){
   const c=currentUser;
   document.getElementById('cli-header').style.display='flex';
   document.getElementById('cli-avatar').textContent=iniciais(c.nome);
   document.getElementById('cli-nome-hdr').textContent=c.nome;
-  document.getElementById('cli-info-hdr').textContent=c.creditos+' créditos · '+PAG_LABEL[c.pagamento]+(c.telefone?' · '+c.telefone:'');
-  // Calcula freq baseado nos créditos
+  document.getElementById('cli-info-hdr').textContent=c.creditos+' crÃ©ditos Â· '+PAG_LABEL[c.pagamento]+(c.telefone?' Â· '+c.telefone:'');
+  // Calcula freq baseado nos crÃ©ditos
   const op=FREQ_OPCOES.slice().reverse().find(o=>c.creditos>=o.cred);
   myFreq=op?op.freq:2;
   renderFreqGrid();
@@ -792,7 +792,7 @@ async function initClienteView(){
     p.onclick=()=>{
       const sel=p.classList.contains('sel');
       const cnt=document.querySelectorAll('.day-pill.sel').length;
-      if(!sel&&cnt>=myFreq){showMsg('freq-msg','Máximo de '+myFreq+' dia(s).','warn');return;}
+      if(!sel&&cnt>=myFreq){showMsg('freq-msg','MÃ¡ximo de '+myFreq+' dia(s).','warn');return;}
       p.classList.toggle('sel');showMsg('freq-msg','','');
     };
   });
@@ -805,7 +805,7 @@ async function carregarAgendamentos(){
   const rows=await sbGet('agendamentos','cliente_codigo=eq.'+currentUser.codigo+'&order=data_slot.asc');
   mySchedule=[];slots={};
   if(rows&&rows.length>0){
-    // Também carrega todos agendamentos para contar vagas
+    // TambÃ©m carrega todos agendamentos para contar vagas
     const todos=await sbGet('agendamentos','select=data_slot,hora,cliente_codigo,cliente_nome');
     if(todos) todos.forEach(r=>{
       const sl=getSlot(r.data_slot,r.hora);
@@ -817,7 +817,7 @@ async function carregarAgendamentos(){
       mySchedule.push({id:r.id,date:r.data_slot,hour:r.hora});
     });
   } else {
-    // Carrega vagas de outros mesmo sem agendamento próprio
+    // Carrega vagas de outros mesmo sem agendamento prÃ³prio
     const todos=await sbGet('agendamentos','select=data_slot,hora,cliente_nome');
     if(todos) todos.forEach(r=>{const sl=getSlot(r.data_slot,r.hora);sl.count++;if(!sl.names.includes(r.cliente_nome))sl.names.push(r.cliente_nome);});
   }
@@ -832,11 +832,11 @@ function renderFreqGrid(){
     b.className='freq-btn'+(op.freq===myFreq?' sel':'');
     b.disabled=!ok;
     b.textContent=op.label;
-    b.title=op.cred+' créditos';
+    b.title=op.cred+' crÃ©ditos';
     b.onclick=()=>{if(ok){myFreq=op.freq;renderFreqGrid();}};
     g.appendChild(b);
   });
-  document.getElementById('credits-badge').textContent=currentUser.creditos+' créditos';
+  document.getElementById('credits-badge').textContent=currentUser.creditos+' crÃ©ditos';
 }
 
 function renderHoraSel(){
@@ -885,7 +885,7 @@ async function salvarFrequencia(){
         mySchedule.push({id:r.id,date:r.data_slot,hour:r.hora});
       });
     }
-    showMsg('freq-msg',mySchedule.length+' sessões agendadas (4 semanas).','ok');
+    showMsg('freq-msg',mySchedule.length+' sessÃµes agendadas (4 semanas).','ok');
     renderGridCliente();
   } finally {loading(false);}
 }
@@ -914,30 +914,30 @@ function renderGridCliente(){
 }
 
 async function bookSlot(dk,h){
-  if(isBlocked4h(dk,h)){showMsg('alter-msg','Bloqueado: menos de 4h de antecedência.','err');return;}
+  if(isBlocked4h(dk,h)){showMsg('alter-msg','Bloqueado: menos de 4h de antecedÃªncia.','err');return;}
   const sl=getSlot(dk,h);
-  if(sl.count>=MAX){showMsg('alter-msg','Horário lotado.','err');return;}
+  if(sl.count>=MAX){showMsg('alter-msg','HorÃ¡rio lotado.','err');return;}
   loading(true,'Agendando...');
   try{
     const res=await sbPost('agendamentos',{cliente_codigo:currentUser.codigo,cliente_nome:currentUser.nome,data_slot:dk,hora:h});
     if(res&&res[0]){
       sl.mine=true;sl.count++;if(!sl.names.includes(currentUser.nome))sl.names.push(currentUser.nome);
       mySchedule.push({id:res[0].id,date:dk,hour:h});
-      renderGridCliente();showMsg('alter-msg','Horário agendado!','ok');
+      renderGridCliente();showMsg('alter-msg','HorÃ¡rio agendado!','ok');
     }
   } finally {loading(false);}
 }
 
 function tryAlter(dk,h){
-  if(isBlocked4h(dk,h)){showMsg('alter-msg','Alteração bloqueada: menos de 4h.','err');return;}
+  if(isBlocked4h(dk,h)){showMsg('alter-msg','AlteraÃ§Ã£o bloqueada: menos de 4h.','err');return;}
   showMsg('alter-msg','Toque em outro slot livre para reagendar.','warn');
 }
 
 function navSemana(d,s){wkOff[s]+=d;if(s==='cli')renderGridCliente();if(s==='col')renderPresencas();if(s==='avail')renderAvailGrid();}
 
-// ── PRESENÇAS ──
+// â”€â”€ PRESENÃ‡AS â”€â”€
 async function initPresencas(){
-  loading(true,'Carregando presenças...');
+  loading(true,'Carregando presenÃ§as...');
   try{
     // Carrega agendamentos da semana
     const ws=getWeekMon(wkOff.col);
@@ -946,7 +946,7 @@ async function initPresencas(){
     // Recria slots
     slots={};
     if(agend) agend.forEach(r=>{const sl=getSlot(r.data_slot,r.hora);sl.count++;if(!sl.names.includes(r.cliente_nome))sl.names.push(r.cliente_nome);});
-    // Carrega presenças salvas
+    // Carrega presenÃ§as salvas
     const pres=await sbGet('presencas',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}`);
     presencasMap={};
     if(pres) pres.forEach(p=>{presencasMap[`${p.data_slot}_${p.hora}_${p.tipo}_${p.codigo}`]=p.status;});
@@ -971,12 +971,12 @@ function renderPresencas(){
   Object.values(presencasMap).forEach(v=>{if(v==='P')totalP++;else if(v==='F')totalF++;else if(v==='FJ')totalFJ++;});
   const tot=totalP+totalF+totalFJ||1;
   document.getElementById('stat-grid').innerHTML=`
-    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${totalP}</div><div class="stat-lbl">Presenças</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${totalP}</div><div class="stat-lbl">PresenÃ§as</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--red)">${totalF}</div><div class="stat-lbl">Faltas</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--yellow)">${totalFJ}</div><div class="stat-lbl">Faltas just.</div></div>
-    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">Presença</div></div>`;
+    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">PresenÃ§a</div></div>`;
   const tbody=document.getElementById('tbody-presencas');
-  if(rows.length===0){tbody.innerHTML='<tr><td colspan="6" style="color:var(--text3);padding:16px 8px;text-align:center">Nenhuma sessão esta semana.</td></tr>';return;}
+  if(rows.length===0){tbody.innerHTML='<tr><td colspan="6" style="color:var(--text3);padding:16px 8px;text-align:center">Nenhuma sessÃ£o esta semana.</td></tr>';return;}
   tbody.innerHTML=rows.map(r=>{
     const fmt=new Date(r.date+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
     const svA=presencasMap[`${r.date}_${r.hour}_aluno_geral`]||'';
@@ -986,15 +986,15 @@ function renderPresencas(){
       <td style="white-space:nowrap">${fmt}</td>
       <td>${String(r.hour).padStart(2,'0')}h</td>
       <td><span class="badge ${r.isManha?'manha':'tarde'}" style="font-size:9px">${r.isManha?'TH':'RE'}</span></td>
-      <td style="font-size:10px;color:var(--text3);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.names.join(', ')||r.count+'×'}</td>
+      <td style="font-size:10px;color:var(--text3);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.names.join(', ')||r.count+'Ã—'}</td>
       <td><select class="status-sel" onchange="setPresenca('${ck}','aluno','geral',this.value)">
-        <option value="" ${svA===''?'selected':''}>—</option>
+        <option value="" ${svA===''?'selected':''}>â€”</option>
         <option value="P" ${svA==='P'?'selected':''}>P</option>
         <option value="F" ${svA==='F'?'selected':''}>F</option>
         <option value="FJ" ${svA==='FJ'?'selected':''}>FJ</option>
       </select></td>
       <td><select class="status-sel" onchange="setPresenca('${ck}','instrutora','${r.isManha?'thayane':'rebeka'}',this.value)">
-        <option value="" ${svI===''?'selected':''}>—</option>
+        <option value="" ${svI===''?'selected':''}>â€”</option>
         <option value="P" ${svI==='P'?'selected':''}>P</option>
         <option value="F" ${svI==='F'?'selected':''}>F</option>
         <option value="FJ" ${svI==='FJ'?'selected':''}>FJ</option>
@@ -1008,12 +1008,12 @@ function setPresenca(ck,tipo,codigo,val){
 }
 
 async function salvarPresencas(){
-  loading(true,'Salvando presenças...');
+  loading(true,'Salvando presenÃ§as...');
   try{
     const upserts=Object.entries(presencasMap).map(([k,status])=>{
       const parts=k.split('_');
       // formato: data_slot(YYYY-MM-DD) _ hora _ tipo _ codigo
-      // data_slot tem 3 partes com hífen
+      // data_slot tem 3 partes com hÃ­fen
       const data_slot=parts.slice(0,3).join('-');
       const hora=parseInt(parts[3]);
       const tipo=parts[4];
@@ -1026,7 +1026,7 @@ async function salvarPresencas(){
   } finally {loading(false);}
 }
 
-// ── VAGAS ──
+// â”€â”€ VAGAS â”€â”€
 async function initVagas(){
   document.getElementById('avail-date').value=toKey(new Date());
   renderAvailHoras();
@@ -1054,7 +1054,7 @@ async function verificarVaga(){
   const res=document.getElementById('avail-result');
   if(!dt){res.innerHTML='<div class="alert err">Selecione uma data.</div>';return;}
   const d=new Date(dt+'T12:00');
-  if(isHoliday(d)){res.innerHTML='<div class="alert warn">Feriado nacional — sem atendimento.</div>';return;}
+  if(isHoliday(d)){res.innerHTML='<div class="alert warn">Feriado nacional â€” sem atendimento.</div>';return;}
   if(isWeekend(d)){res.innerHTML='<div class="alert warn">Sem atendimento no final de semana.</div>';return;}
   loading(true,'Verificando...');
   try{
@@ -1062,8 +1062,8 @@ async function verificarVaga(){
     const count=(rows||[]).length;const livre=MAX-count;
     const inst=HORAS_MANHA.includes(h)?'Thayane':'Rebeka';
     res.innerHTML=livre<=0
-      ?`<div class="alert err">Lotado — 0 vagas às ${String(h).padStart(2,'0')}h · ${inst}</div>`
-      :`<div class="alert ok">${livre} de ${MAX} vagas às ${String(h).padStart(2,'0')}h · ${inst}</div>`;
+      ?`<div class="alert err">Lotado â€” 0 vagas Ã s ${String(h).padStart(2,'0')}h Â· ${inst}</div>`
+      :`<div class="alert ok">${livre} de ${MAX} vagas Ã s ${String(h).padStart(2,'0')}h Â· ${inst}</div>`;
   } finally {loading(false);}
 }
 
@@ -1076,7 +1076,7 @@ async function renderAvailGrid(){
   document.getElementById('avail-stats').innerHTML=`
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">${livreTotal}</div><div class="stat-lbl">Vagas livres</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--red)">${lotados}</div><div class="stat-lbl">Lotados</div></div>
-    <div class="stat-card"><div class="stat-num">${HORAS_MANHA.length*5}</div><div class="stat-lbl">Slots manhã</div></div>
+    <div class="stat-card"><div class="stat-num">${HORAS_MANHA.length*5}</div><div class="stat-lbl">Slots manhÃ£</div></div>
     <div class="stat-card"><div class="stat-num">${HORAS_TARDE.length*5}</div><div class="stat-lbl">Slots tarde</div></div>`;
   let html='<div class="grid grid-5"><div class="gh"></div>';
   days.forEach(d=>{const today=toKey(d)===toKey(new Date());html+=`<div class="gh${today?' today-col':''}">${DIAS[d.getDay()]}<br><span style="font-size:9px">${d.getDate()}/${d.getMonth()+1}</span></div>`;});
@@ -1095,7 +1095,7 @@ async function renderAvailGrid(){
   html+='</div>';document.getElementById('grid-avail').innerHTML=html;
 }
 
-// ── LOGIN AUTOMÁTICO VIA URL ──
+// â”€â”€ LOGIN AUTOMÃTICO VIA URL â”€â”€
 function verificarLoginURL(){
   const params=new URLSearchParams(window.location.search);
   const codCli=params.get('c');
@@ -1103,19 +1103,19 @@ function verificarLoginURL(){
   if(codCli){
     document.getElementById('login-tipo').value='cliente';loginTipoChange();
     document.getElementById('cli-codigo').value=codCli.toUpperCase();
-    showMsg('login-msg','Olá! Informe sua data de nascimento para entrar.','info');
+    showMsg('login-msg','OlÃ¡! Informe sua data de nascimento para entrar.','info');
     window.history.replaceState({},'',window.location.pathname);
   }
   if(codCol){
     document.getElementById('login-tipo').value='colaborador';loginTipoChange();
     document.getElementById('colab-codigo').value=codCol.toUpperCase();
-    showMsg('login-msg','Olá! Informe sua data de nascimento para entrar.','info');
+    showMsg('login-msg','OlÃ¡! Informe sua data de nascimento para entrar.','info');
     window.history.replaceState({},'',window.location.pathname);
   }
 }
 window.addEventListener('DOMContentLoaded',verificarLoginURL);
 
-// ── PWA ──
+// â”€â”€ PWA â”€â”€
 const manifest={name:'Reviva Pilates',short_name:'Reviva',description:'Agenda digital Reviva Pilates',start_url:'.',display:'standalone',background_color:'#0f0f1a',theme_color:'#1a1a2e',orientation:'portrait',icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="%231a1a2e"/><text x="96" y="130" font-size="100" text-anchor="middle" fill="%23c084fc" font-family="serif">R</text></svg>',sizes:'192x192',type:'image/svg+xml'}]};
 const mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
 document.getElementById('manifest-link').href=URL.createObjectURL(mblob);
