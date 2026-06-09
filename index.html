@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reviva Pilates">
+<meta name="description" content="Agenda digital Reviva Pilates">
+<link rel="manifest" id="manifest-link">
+<title>Reviva Pilates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0f0f1a;--bg2:#16162a;--bg3:#1e1e35;
+  --card:#1a1a2e;--card2:#20203a;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.12);
+  --text:#f0f0f8;--text2:#a0a0c0;--text3:#6060a0;
+  --accent:#c084fc;--accent2:#a855f7;
+  --accent-dim:rgba(192,132,252,0.12);--accent-dim2:rgba(192,132,252,0.2);
+  --green:#4ade80;--green-dim:rgba(74,222,128,0.12);
+  --red:#f87171;--red-dim:rgba(248,113,113,0.12);
+  --yellow:#fbbf24;--yellow-dim:rgba(251,191,36,0.1);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.12);
+  --manha:#38bdf8;--manha-dim:rgba(56,189,248,0.12);
+  --tarde:#fb923c;--tarde-dim:rgba(251,146,60,0.12);
+  --radius:12px;--radius-sm:8px;--radius-xs:5px;
+  --font:'DM Sans',sans-serif;--font-display:'Playfair Display',serif;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);background:var(--bg);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.5}
+input,select,button{font-family:var(--font)}
+
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{padding:calc(var(--safe-top) + 12px) 16px 12px;background:var(--bg);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{font-family:var(--font-display);font-size:18px;font-weight:500;color:var(--text)}
+.logo span{color:var(--accent)}
+.user-tag{font-size:10px;color:var(--text3)}
+.logout-btn{padding:6px 10px;border-radius:var(--radius-xs);border:0.5px solid var(--border2);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s}
+.logout-btn:hover{background:var(--red-dim);color:var(--red);border-color:var(--red)}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;padding:8px 8px calc(var(--safe-bottom) + 8px);background:var(--bg);border-top:0.5px solid var(--border);display:none;z-index:100;backdrop-filter:blur(12px)}
+.bottom-nav.visible{display:flex;gap:4px}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--text3);font-size:9px;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--font);text-transform:uppercase;letter-spacing:0.05em}
+.nav-btn i{font-size:20px}
+.nav-btn.active{color:var(--accent);background:var(--accent-dim)}
+
+.main{flex:1;padding:16px 16px calc(var(--safe-bottom) + 80px)}
+.screen{display:none}.screen.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title i{color:var(--accent);font-size:16px}
+
+.login-bg{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;background:radial-gradient(ellipse at 30% 20%,rgba(192,132,252,0.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(56,189,248,0.06) 0%,transparent 50%),var(--bg)}
+.login-logo{font-family:var(--font-display);font-size:32px;font-weight:500;color:var(--text);margin-bottom:4px;text-align:center}
+.login-logo span{color:var(--accent)}
+.login-tagline{font-size:12px;color:var(--text3);text-align:center;margin-bottom:32px;letter-spacing:0.05em;text-transform:uppercase}
+.login-box{width:100%;max-width:360px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:24px}
+.login-box h3{font-size:14px;font-weight:500;margin-bottom:16px}
+
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:0.06em}
+.field input,.field select{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.field input::placeholder{color:var(--text3)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row .field{margin-bottom:0}
+
+.btn{padding:10px 16px;border-radius:var(--radius-sm);border:0.5px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:var(--bg3);color:var(--text2);font-family:var(--font);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--bg2);color:var(--text)}
+.btn:active{transform:scale(0.97)}
+.btn.sm{padding:6px 10px;font-size:11px;border-radius:var(--radius-xs)}
+.btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent)}
+.btn.success{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.btn.danger{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+.btn.full{width:100%;justify-content:center}
+
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.badge.manha{background:var(--manha-dim);color:var(--manha)}
+.badge.tarde{background:var(--tarde-dim);color:var(--tarde)}
+.badge.admin{background:var(--accent-dim);color:var(--accent)}
+.badge.ativo{background:var(--green-dim);color:var(--green);cursor:pointer}
+.badge.inativo{background:var(--bg3);color:var(--text3);cursor:pointer}
+.badge.pix{background:var(--green-dim);color:var(--green)}
+.badge.debito{background:var(--blue-dim);color:var(--blue)}
+.badge.credito{background:var(--tarde-dim);color:var(--tarde)}
+.code-tag{font-family:monospace;font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--text2);border:0.5px solid var(--border)}
+
+.alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;margin-top:10px}
+.alert.ok{background:var(--green-dim);color:var(--green);border:0.5px solid rgba(74,222,128,0.2)}
+.alert.err{background:var(--red-dim);color:var(--red);border:0.5px solid rgba(248,113,113,0.2)}
+.alert.warn{background:var(--yellow-dim);color:var(--yellow);border:0.5px solid rgba(251,191,36,0.2)}
+.alert.info{background:var(--blue-dim);color:var(--blue);border:0.5px solid rgba(96,165,250,0.2)}
+
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center}
+.stat-num{font-size:22px;font-weight:500;font-family:var(--font-display)}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:0.04em}
+
+.tab-row{display:flex;gap:6px;margin-bottom:12px;background:var(--bg3);padding:4px;border-radius:var(--radius-sm)}
+.tab-btn{flex:1;padding:7px;border-radius:var(--radius-xs);border:none;font-size:11px;font-weight:500;cursor:pointer;background:transparent;color:var(--text3);font-family:var(--font);transition:all .15s}
+.tab-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+
+/* CRÉDITOS: 2x a 5x = 4 colunas */
+.freq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.freq-btn{padding:8px 4px;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-size:11px;font-weight:500;cursor:pointer;background:var(--bg3);color:var(--text2);text-align:center;font-family:var(--font);transition:all .15s}
+.freq-btn.sel{background:var(--accent-dim2);border-color:var(--accent);color:var(--accent)}
+.freq-btn:disabled{opacity:.3;cursor:not-allowed}
+
+.days-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.day-pill{padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);font-size:11px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s}
+.day-pill.sel{background:var(--accent-dim2);border-color:var(--accent);color:var(--accent)}
+
+.week-nav{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.week-nav span{flex:1;text-align:center;font-size:13px;font-weight:500}
+
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+.agenda-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.grid{display:grid;gap:2px}
+.grid-5{grid-template-columns:48px repeat(5,1fr)}
+.gh{text-align:center;padding:4px 2px;font-weight:500;color:var(--text3);font-size:10px;line-height:1.3}
+.gh.today-col{color:var(--accent)}
+.tlabel{color:var(--text3);font-size:9px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;border-right:0.5px solid var(--border)}
+.slot{border-radius:4px;min-height:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:all .1s;border:0.5px solid transparent;cursor:pointer}
+.slot.free{background:var(--bg3);border-color:var(--border)}
+.slot.free:hover{border-color:var(--accent)}
+.slot.mine{background:var(--green-dim);border-color:rgba(74,222,128,0.3)}
+.slot.full{background:var(--red-dim);border-color:rgba(248,113,113,0.2);cursor:default}
+.slot.holiday{background:var(--yellow-dim);border-color:rgba(251,191,36,0.2);cursor:default}
+.slot.locked{opacity:.35;cursor:not-allowed}
+.slot-count{font-size:9px;font-weight:500;color:var(--text3)}
+.slot.mine .slot-count{color:var(--green)}
+.slot.full .slot-count{color:var(--red)}
+
+.data-table{width:100%;border-collapse:collapse;font-size:11px}
+.data-table th{text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--border);font-weight:500;color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:0.04em}
+.data-table td{padding:8px;border-bottom:0.5px solid var(--border);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg3)}
+.status-sel{border:0.5px solid var(--border);border-radius:var(--radius-xs);padding:4px 6px;font-size:11px;background:var(--bg3);color:var(--text);font-family:var(--font);-webkit-appearance:none;appearance:none;width:100%}
+
+.link-box{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--text2);word-break:break-all;font-family:monospace;margin-top:8px}
+.cli-header{background:linear-gradient(135deg,var(--accent-dim),var(--blue-dim));border:0.5px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#fff;flex-shrink:0}
+
+/* Loading overlay */
+.loading-overlay{position:fixed;inset:0;background:rgba(15,15,26,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:12px}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--text2)}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading" style="display:none">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">Aguarde...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-bg">
+    <div class="login-logo">Reviva<span>.</span></div>
+    <div class="login-tagline">Studio de Pilates</div>
+    <div class="login-box">
+      <h3>Acesso à agenda</h3>
+      <div class="field">
+        <label>Tipo de acesso</label>
+        <select id="login-tipo" onchange="loginTipoChange()">
+          <option value="">Selecione...</option>
+          <option value="admin">Administradora (Reviva)</option>
+          <option value="colaborador">Colaboradora</option>
+          <option value="cliente">Cliente</option>
+        </select>
+      </div>
+      <div id="fields-admin" style="display:none">
+        <div class="field"><label>Senha</label>
+          <input type="password" id="admin-senha" placeholder="••••••••••" autocomplete="current-password">
+        </div>
+      </div>
+      <div id="fields-colab" style="display:none">
+        <div class="field"><label>Código de acesso</label>
+          <input type="text" id="colab-codigo" placeholder="COL-001" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="field"><label>Data de nascimento (senha)</label>
+          <input type="date" id="colab-nasc-login" autocomplete="off">
+        </div>
+      </div>
+      <div id="fields-cliente" style="display:none">
+        <div class="field"><label>Código de acesso</label>
+          <input type="text" id="cli-codigo" placeholder="CLI-001" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="field"><label>Data de nascimento (senha)</label>
+          <input type="date" id="cli-nasc-login" autocomplete="off">
+        </div>
+      </div>
+      <button class="btn primary full" onclick="fazerLogin()" style="margin-top:4px">
+        <i class="ti ti-login"></i> Entrar
+      </button>
+      <div id="login-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar" style="display:none" class="topbar">
+  <div>
+    <div class="logo">Reviva<span>.</span></div>
+    <div class="user-tag" id="user-label">—</div>
+  </div>
+  <button class="logout-btn" onclick="logout()"><i class="ti ti-logout"></i> Sair</button>
+</div>
+
+<!-- CADASTROS -->
+<div id="screen-cadastros" class="screen" style="display:none">
+  <div class="main">
+  <div class="tab-row">
+    <button class="tab-btn active" id="tab-cli-btn" onclick="switchTab('cli')">Clientes</button>
+    <button class="tab-btn" id="tab-col-btn" onclick="switchTab('col')">Colaboradoras</button>
+  </div>
+
+  <div id="tab-cli">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-user-plus"></i> Novo cliente</div>
+      <div class="field-row">
+        <div class="field"><label>Nome *</label><input type="text" id="c-nome" placeholder="Nome completo"></div>
+        <div class="field"><label>CPF *</label><input type="text" id="c-cpf" placeholder="000.000.000-00"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Nascimento *</label><input type="date" id="c-nasc"></div>
+        <div class="field"><label>Telefone</label><input type="tel" id="c-tel" placeholder="(81) 9 0000-0000"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Créditos</label>
+          <select id="c-cred">
+            <option value="9">9 — 2×/sem</option>
+            <option value="13">13 — 3×/sem</option>
+            <option value="17">17 — 4×/sem</option>
+            <option value="21">21 — 5×/sem</option>
+          </select>
+        </div>
+        <div class="field"><label>Pagamento</label>
+          <select id="c-pag">
+            <option value="pix">PIX</option>
+            <option value="debito">Débito</option>
+            <option value="credito">Crédito</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn primary full" onclick="cadastrarCliente()" style="margin-top:4px"><i class="ti ti-plus"></i> Cadastrar</button>
+      <div id="msg-cad-cli"></div>
+    </div>
+
+    <div id="link-modal-cli" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-link"></i> Link gerado</div>
+      <div id="link-cli-label" style="font-size:12px;margin-bottom:6px;color:var(--text2)"></div>
+      <div class="link-box" id="link-cli-box"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn success sm" onclick="copiar('link-cli-box','copy-cli-ok')"><i class="ti ti-copy"></i> Copiar</button>
+        <button class="btn sm" onclick="document.getElementById('link-modal-cli').style.display='none'">Fechar</button>
+        <span id="copy-cli-ok" style="font-size:11px;color:var(--green);align-self:center"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="ti ti-users"></i> Clientes <span id="total-cli" style="font-size:11px;font-weight:400;color:var(--text3)"></span></div>
+      <input type="text" id="busca-cli" placeholder="Buscar por nome ou código..." style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--text);outline:none;margin-bottom:10px" oninput="renderTabelaClientes()">
+      <div style="overflow-x:auto">
+        <table class="data-table"><thead><tr>
+          <th>Código</th><th>Nome</th><th>Créditos</th><th>Pgto.</th><th>Status</th><th></th>
+        </tr></thead><tbody id="tbody-cli"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-col" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-user-plus"></i> Nova colaboradora</div>
+      <div class="field-row">
+        <div class="field"><label>Nome *</label><input type="text" id="col-nome" placeholder="Nome completo"></div>
+        <div class="field"><label>CPF *</label><input type="text" id="col-cpf" placeholder="000.000.000-00"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Nascimento *</label><input type="date" id="col-nasc"></div>
+        <div class="field"><label>Telefone</label><input type="tel" id="col-tel" placeholder="(81) 9 0000-0000"></div>
+      </div>
+      <div class="field"><label>Turno</label>
+        <select id="col-turno">
+          <option value="manha">Manhã (6h–12h)</option>
+          <option value="tarde">Tarde/Noite (14h–20h)</option>
+          <option value="todos">Ambos os turnos</option>
+        </select>
+      </div>
+      <button class="btn primary full" onclick="cadastrarColaboradora()" style="margin-top:4px"><i class="ti ti-plus"></i> Cadastrar</button>
+      <div id="msg-cad-col"></div>
+    </div>
+
+    <div id="link-modal-col" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-key"></i> Link gerado</div>
+      <div id="link-col-label" style="font-size:12px;margin-bottom:6px;color:var(--text2)"></div>
+      <div class="link-box" id="link-col-box"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn success sm" onclick="copiar('link-col-box','copy-col-ok')"><i class="ti ti-copy"></i> Copiar</button>
+        <button class="btn sm" onclick="document.getElementById('link-modal-col').style.display='none'">Fechar</button>
+        <span id="copy-col-ok" style="font-size:11px;color:var(--green);align-self:center"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="ti ti-clipboard-check"></i> Colaboradoras <span id="total-col" style="font-size:11px;font-weight:400;color:var(--text3)"></span></div>
+      <div style="overflow-x:auto">
+        <table class="data-table"><thead><tr>
+          <th>Código</th><th>Nome</th><th>Turno</th><th>Status</th><th></th>
+        </tr></thead><tbody id="tbody-col"></tbody></table>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- AGENDA CLIENTE -->
+<div id="screen-agenda" class="screen" style="display:none">
+  <div class="main">
+  <div class="cli-header" id="cli-header" style="display:none">
+    <div class="avatar" id="cli-avatar">AN</div>
+    <div>
+      <div style="font-size:15px;font-weight:500" id="cli-nome-hdr"></div>
+      <div style="font-size:11px;color:var(--text2)" id="cli-info-hdr"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-repeat"></i> Frequência semanal</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="background:var(--accent-dim2);color:var(--accent);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500" id="credits-badge">— créditos</span>
+      <span style="font-size:11px;color:var(--text3)">disponíveis</span>
+    </div>
+    <div class="freq-grid" id="freq-grid"></div>
+    <div class="days-row" id="days-row">
+      <span class="day-pill" data-d="1">Seg</span>
+      <span class="day-pill" data-d="2">Ter</span>
+      <span class="day-pill" data-d="3">Qua</span>
+      <span class="day-pill" data-d="4">Qui</span>
+      <span class="day-pill" data-d="5">Sex</span>
+    </div>
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0"><label>Turno</label>
+        <select id="turno-sel" onchange="renderHoraSel()">
+          <option value="manha">Manhã — Thayane</option>
+          <option value="tarde">Tarde — Rebeka</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0"><label>Horário</label><select id="hora-sel"></select></div>
+    </div>
+    <button class="btn primary full" onclick="salvarFrequencia()" style="margin-top:10px"><i class="ti ti-check"></i> Salvar frequência</button>
+    <div id="freq-msg"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-calendar-week"></i> Minha agenda</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Toque no slot verde para reagendar. Bloqueado a menos de 4h.</div>
+    <div class="week-nav">
+      <button class="btn sm" onclick="navSemana(-1,'cli')"><i class="ti ti-arrow-left"></i></button>
+      <span id="week-cli"></span>
+      <button class="btn sm" onclick="navSemana(1,'cli')"><i class="ti ti-arrow-right"></i></button>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--green-dim);border:0.5px solid rgba(74,222,128,0.3)"></div>Meu horário</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--red-dim)"></div>Lotado</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--yellow-dim)"></div>Feriado</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--bg3)"></div>Livre</div>
+    </div>
+    <div class="agenda-wrap"><div id="grid-cli"></div></div>
+    <div id="alter-msg"></div>
+  </div>
+  </div>
+</div>
+
+<!-- PRESENÇAS -->
+<div id="screen-presencas" class="screen" style="display:none">
+  <div class="main">
+  <div class="stat-grid" id="stat-grid"></div>
+  <div class="week-nav">
+    <button class="btn sm" onclick="navSemana(-1,'col')"><i class="ti ti-arrow-left"></i></button>
+    <span id="week-col"></span>
+    <button class="btn sm" onclick="navSemana(1,'col')"><i class="ti ti-arrow-right"></i></button>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-clipboard-list"></i> Registro de presença</div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th>Data</th><th>Hora</th><th>Inst.</th><th>Alunos</th><th>Aluno</th><th>Instrutora</th></tr></thead>
+        <tbody id="tbody-presencas"></tbody>
+      </table>
+    </div>
+    <button class="btn primary" onclick="salvarPresencas()" style="margin-top:12px"><i class="ti ti-device-floppy"></i> Salvar</button>
+    <span id="msg-presenca" style="font-size:11px;color:var(--green);margin-left:10px"></span>
+  </div>
+  </div>
+</div>
+
+<!-- VAGAS -->
+<div id="screen-vagas" class="screen" style="display:none">
+  <div class="main">
+  <div class="stat-grid" id="avail-stats"></div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-search"></i> Verificar vaga</div>
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0"><label>Data</label><input type="date" id="avail-date"></div>
+      <div class="field" style="margin-bottom:0"><label>Turno</label>
+        <select id="avail-turno" onchange="renderAvailHoras()">
+          <option value="manha">Manhã — Thayane</option>
+          <option value="tarde">Tarde — Rebeka</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>Horário</label><select id="avail-hora"></select></div>
+    <button class="btn primary full" onclick="verificarVaga()" style="margin-top:4px"><i class="ti ti-search"></i> Verificar</button>
+    <div id="avail-result"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-calendar-stats"></i> Semana completa</div>
+    <div class="week-nav">
+      <button class="btn sm" onclick="navSemana(-1,'avail')"><i class="ti ti-arrow-left"></i></button>
+      <span id="week-avail"></span>
+      <button class="btn sm" onclick="navSemana(1,'avail')"><i class="ti ti-arrow-right"></i></button>
+    </div>
+    <div class="legend">
+      <div class="leg"><span class="badge manha" style="font-size:9px">T</span>Thayane</div>
+      <div class="leg"><span class="badge tarde" style="font-size:9px">R</span>Rebeka</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--yellow-dim)"></div>Feriado</div>
+    </div>
+    <div class="agenda-wrap"><div id="grid-avail"></div></div>
+  </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn" id="nav-agenda" onclick="setMode('agenda')" style="display:none"><i class="ti ti-calendar"></i>Agenda</button>
+  <button class="nav-btn" id="nav-presencas" onclick="setMode('presencas')" style="display:none"><i class="ti ti-clipboard-check"></i>Presenças</button>
+  <button class="nav-btn" id="nav-cadastros" onclick="setMode('cadastros')" style="display:none"><i class="ti ti-users"></i>Cadastros</button>
+  <button class="nav-btn" id="nav-vagas" onclick="setMode('vagas')"><i class="ti ti-search"></i>Vagas</button>
+</div>
+</div>
+
+<script>
+// ── SUPABASE CONFIG ──
+const SB_URL='https://lnmwcjywxszijrbguxaj.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubXdjanl3eHN6aWpyYmd1eGFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzE3NTAsImV4cCI6MjA5NjM0Nzc1MH0.pjj_HsDcOeNybYzSSFiIP1YDYxQqjRXh9JaTv-emA9c';
+
+async function sbGet(table,filters=''){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?${filters}`,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+  return r.json();
+}
+async function sbPost(table,body){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(body)});
+  return r.json();
+}
+async function sbPatch(table,filters,body){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?${filters}`,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(body)});
+  return r.json();
+}
+async function sbDelete(table,filters){
+  await fetch(`${SB_URL}/rest/v1/${table}?${filters}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+}
+async function sbUpsert(table,body){
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+// ── CONSTANTES ──
+const MAX=4;
+const HORAS_MANHA=[6,7,8,9,10,11,12];
+const HORAS_TARDE=[14,15,16,17,18,19,20];
+const ALL_HORAS=[...HORAS_MANHA,...HORAS_TARDE];
+const FERIADOS=new Set(['2025-01-01','2025-04-18','2025-04-21','2025-05-01','2025-06-19','2025-09-07','2025-10-12','2025-11-02','2025-11-15','2025-11-20','2025-12-25','2026-01-01','2026-04-03','2026-04-21','2026-05-01','2026-06-04','2026-09-07','2026-10-12','2026-11-02','2026-11-15','2026-11-20','2026-12-25']);
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const ADMIN_SENHA='Reviv4pilates';
+const NETLIFY='https://comfy-cascaron-bea01f.netlify.app';
+const TURNO_LABEL={manha:'Manhã',tarde:'Tarde',todos:'Ambos'};
+const PAG_LABEL={pix:'PIX',debito:'Débito',credito:'Crédito'};
+const PAG_CLS={pix:'pix',debito:'debito',credito:'credito'};
+const TURNO_CLS={manha:'manha',tarde:'tarde',todos:'admin'};
+
+// Créditos: 2x=9, 3x=13, 4x=17, 5x=21
+const FREQ_OPCOES=[
+  {freq:2,cred:9,label:'2×/sem'},
+  {freq:3,cred:13,label:'3×/sem'},
+  {freq:4,cred:17,label:'4×/sem'},
+  {freq:5,cred:21,label:'5×/sem'},
+];
+
+let currentUser=null;
+let wkOff={cli:0,col:0,avail:0};
+let slots={};       // {dk_h: {count, names[]}}
+let presencasMap={}; // {dk_h_tipo_codigo: status}
+let mySchedule=[];
+let myFreq=2;
+let cliCounter=1;
+let colCounter=1;
+
+// ── HELPERS ──
+function toKey(d){return d.toISOString().slice(0,10)}
+function isHoliday(d){return FERIADOS.has(toKey(d))}
+function isWeekend(d){return d.getDay()===0||d.getDay()===6}
+function getSlot(dk,h){const k=dk+'_'+h;if(!slots[k])slots[k]={count:0,names:[]};return slots[k]}
+function isBlocked4h(dk,h){const now=new Date();const t=new Date(dk+'T'+String(h).padStart(2,'0')+':00:00');return(t-now)<4*3600*1000}
+function getWeekMon(off){const now=new Date();const day=now.getDay();const diff=now.getDate()-(day===0?6:day-1);const mon=new Date(now);mon.setDate(diff+off*7);mon.setHours(0,0,0,0);return mon;}
+function fmtWeek(mon){const fri=new Date(mon);fri.setDate(fri.getDate()+4);return mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+fri.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});}
+function iniciais(n){return n.trim().split(' ').filter(Boolean).map(p=>p[0]).join('').toUpperCase().slice(0,2);}
+function fmtNasc(nasc){if(!nasc)return '';const p=nasc.split('-');return p.length===3?p[2]+p[1]+p[0]:nasc.replace(/\D/g,'');}
+function h4t(t){return t==='manha'?HORAS_MANHA:t==='tarde'?HORAS_TARDE:ALL_HORAS;}
+function loading(show,txt='Aguarde...'){document.getElementById('loading').style.display=show?'flex':'none';document.getElementById('loading-text').textContent=txt;}
+function showMsg(id,txt,type){const el=document.getElementById(id);if(el)el.innerHTML=txt?`<div class="alert ${type}">${txt}</div>`:'';}
+
+// Gera código sequencial lendo contador do Supabase
+async function gerarCodigoCli(){
+  const rows=await sbGet('clientes','select=codigo&order=created_at.desc&limit=1');
+  if(rows&&rows.length>0){
+    const last=rows[0].codigo;const n=parseInt(last.replace('CLI-',''))+1;
+    return 'CLI-'+String(n).padStart(3,'0');
+  }
+  return 'CLI-001';
+}
+async function gerarCodigoCol(){
+  const rows=await sbGet('colaboradoras','select=codigo&order=created_at.desc&limit=1');
+  if(rows&&rows.length>0){
+    const last=rows[0].codigo;const n=parseInt(last.replace('COL-',''))+1;
+    return 'COL-'+String(n).padStart(3,'0');
+  }
+  return 'COL-001';
+}
+
+// ── LOGIN ──
+function loginTipoChange(){
+  const v=document.getElementById('login-tipo').value;
+  document.getElementById('fields-admin').style.display=v==='admin'?'block':'none';
+  document.getElementById('fields-colab').style.display=v==='colaborador'?'block':'none';
+  document.getElementById('fields-cliente').style.display=v==='cliente'?'block':'none';
+}
+
+async function fazerLogin(){
+  const tipo=document.getElementById('login-tipo').value;
+  if(!tipo){showMsg('login-msg','Selecione o tipo de acesso.','err');return;}
+  loading(true,'Verificando acesso...');
+  try{
+    if(tipo==='admin'){
+      if(document.getElementById('admin-senha').value!==ADMIN_SENHA){showMsg('login-msg','Senha incorreta.','err');return;}
+      currentUser={tipo:'admin',nome:'Reviva'};
+      document.getElementById('user-label').textContent='Reviva — administradora';
+      showNav(['nav-cadastros','nav-presencas','nav-vagas']);
+      abrirApp('cadastros');
+    } else if(tipo==='colaborador'){
+      const cod=document.getElementById('colab-codigo').value.trim().toUpperCase();
+      const nasc=document.getElementById('colab-nasc-login').value;
+      if(!cod||!nasc){showMsg('login-msg','Preencha código e data de nascimento.','err');return;}
+      const rows=await sbGet('colaboradoras',`codigo=eq.${cod}&ativo=eq.true`);
+      if(!rows||rows.length===0){showMsg('login-msg','Código não encontrado ou colaboradora inativa.','err');return;}
+      const col=rows[0];
+      if(fmtNasc(col.nascimento)!==fmtNasc(nasc)){showMsg('login-msg','Data de nascimento incorreta.','err');return;}
+      currentUser={tipo:'colaborador',...col};
+      document.getElementById('user-label').textContent=col.nome+' — '+TURNO_LABEL[col.turno];
+      showNav(['nav-presencas','nav-vagas']);
+      abrirApp('presencas');
+    } else {
+      const cod=document.getElementById('cli-codigo').value.trim().toUpperCase();
+      const nasc=document.getElementById('cli-nasc-login').value;
+      if(!cod||!nasc){showMsg('login-msg','Preencha código e data de nascimento.','err');return;}
+      const rows=await sbGet('clientes',`codigo=eq.${cod}&ativo=eq.true`);
+      if(!rows||rows.length===0){showMsg('login-msg','Código não encontrado ou cliente inativo.','err');return;}
+      const cli=rows[0];
+      if(fmtNasc(cli.nascimento)!==fmtNasc(nasc)){showMsg('login-msg','Data de nascimento incorreta.','err');return;}
+      currentUser={tipo:'cliente',...cli};
+      document.getElementById('user-label').textContent=cli.nome+' — '+cli.creditos+' créditos';
+      showNav(['nav-agenda','nav-vagas']);
+      await initClienteView();
+    }
+  } finally {loading(false);}
+}
+
+function abrirApp(modo){
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('bottom-nav').classList.add('visible');
+  setMode(modo);
+}
+
+function showNav(ids){
+  ['nav-agenda','nav-presencas','nav-cadastros','nav-vagas'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display=ids.includes(id)?'flex':'none';
+  });
+}
+
+function logout(){
+  currentUser=null;mySchedule=[];slots={};presencasMap={};
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('bottom-nav').classList.remove('visible');
+  ['agenda','cadastros','presencas','vagas'].forEach(s=>{
+    const el=document.getElementById('screen-'+s);
+    if(el){el.style.display='none';el.classList.remove('active');}
+  });
+  document.getElementById('screen-login').style.display='block';
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('login-tipo').value='';
+  ['fields-admin','fields-colab','fields-cliente'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('admin-senha').value='';
+  document.getElementById('colab-codigo').value='';
+  document.getElementById('colab-nasc-login').value='';
+  document.getElementById('cli-codigo').value='';
+  document.getElementById('cli-nasc-login').value='';
+  showMsg('login-msg','','');
+}
+
+function setMode(m){
+  ['agenda','cadastros','presencas','vagas'].forEach(s=>{
+    const el=document.getElementById('screen-'+s);
+    if(el){el.style.display='none';el.classList.remove('active');}
+  });
+  const el=document.getElementById('screen-'+m);
+  if(el){el.style.display='block';setTimeout(()=>el.classList.add('active'),10);}
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+m);
+  if(nb) nb.classList.add('active');
+  if(m==='agenda') renderGridCliente();
+  if(m==='presencas') initPresencas();
+  if(m==='cadastros'){renderTabelaClientes();renderTabelaColabs();}
+  if(m==='vagas') initVagas();
+  window.scrollTo(0,0);
+}
+
+function switchTab(tab){
+  ['cli','col'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('tab-'+t+'-btn').classList.toggle('active',t===tab);
+  });
+}
+
+// ── CADASTRO CLIENTE ──
+async function cadastrarCliente(){
+  const nome=document.getElementById('c-nome').value.trim();
+  const cpf=document.getElementById('c-cpf').value.trim();
+  const nasc=document.getElementById('c-nasc').value;
+  if(!nome||!cpf||!nasc){showMsg('msg-cad-cli','Nome, CPF e nascimento são obrigatórios.','err');return;}
+  loading(true,'Cadastrando cliente...');
+  try{
+    const codigo=await gerarCodigoCli();
+    const body={codigo,nome,cpf,nascimento:nasc,telefone:document.getElementById('c-tel').value.trim(),creditos:parseInt(document.getElementById('c-cred').value),pagamento:document.getElementById('c-pag').value,ativo:true};
+    const res=await sbPost('clientes',body);
+    if(res&&res[0]){
+      ['c-nome','c-cpf','c-nasc','c-tel'].forEach(id=>document.getElementById(id).value='');
+      showMsg('msg-cad-cli','Cadastrado! Código: '+codigo,'ok');
+      mostrarLinkCli(res[0]);
+      renderTabelaClientes();
+    } else {
+      showMsg('msg-cad-cli','Erro ao cadastrar. Verifique os dados.','err');
+    }
+  } finally {loading(false);}
+}
+
+function mostrarLinkCli(cli){
+  const link=NETLIFY+'/?c='+cli.codigo;
+  document.getElementById('link-modal-cli').style.display='block';
+  document.getElementById('link-cli-label').textContent=cli.nome+' · '+cli.codigo+' · '+cli.creditos+' créditos';
+  document.getElementById('link-cli-box').textContent=link;
+}
+
+async function renderTabelaClientes(){
+  loading(true,'Carregando clientes...');
+  try{
+    const busca=(document.getElementById('busca-cli')?.value||'').toLowerCase();
+    const rows=await sbGet('clientes','order=nome.asc');
+    const f=(rows||[]).filter(c=>!busca||c.nome.toLowerCase().includes(busca)||c.codigo.toLowerCase().includes(busca));
+    document.getElementById('total-cli').textContent='('+f.length+')';
+    document.getElementById('tbody-cli').innerHTML=f.length===0
+      ?'<tr><td colspan="6" style="color:var(--text3);padding:16px 8px;text-align:center">Nenhum cliente cadastrado.</td></tr>'
+      :f.map(c=>`<tr>
+        <td><span class="code-tag">${c.codigo}</span></td>
+        <td style="font-weight:500">${c.nome}</td>
+        <td style="text-align:center">${c.creditos}</td>
+        <td><span class="badge ${PAG_CLS[c.pagamento]||'pix'}">${PAG_LABEL[c.pagamento]||'PIX'}</span></td>
+        <td><span class="${c.ativo?'badge ativo':'badge inativo'}" onclick="toggleCli('${c.id}',${!c.ativo})">${c.ativo?'Ativo':'Inativo'}</span></td>
+        <td style="display:flex;gap:4px">
+          <button class="btn sm" onclick='mostrarLinkCli(${JSON.stringify(c)})'><i class="ti ti-link"></i></button>
+          <button class="btn sm danger" onclick="excluirCli('${c.id}')"><i class="ti ti-trash"></i></button>
+        </td>
+      </tr>`).join('');
+  } finally {loading(false);}
+}
+
+async function toggleCli(id,ativo){
+  await sbPatch('clientes','id=eq.'+id,{ativo});
+  renderTabelaClientes();
+}
+async function excluirCli(id){
+  if(!confirm('Remover este cliente?')) return;
+  await sbDelete('clientes','id=eq.'+id);
+  renderTabelaClientes();
+}
+
+// ── CADASTRO COLABORADORA ──
+async function cadastrarColaboradora(){
+  const nome=document.getElementById('col-nome').value.trim();
+  const cpf=document.getElementById('col-cpf').value.trim();
+  const nasc=document.getElementById('col-nasc').value;
+  if(!nome||!cpf||!nasc){showMsg('msg-cad-col','Nome, CPF e nascimento são obrigatórios.','err');return;}
+  loading(true,'Cadastrando colaboradora...');
+  try{
+    const codigo=await gerarCodigoCol();
+    const body={codigo,nome,cpf,nascimento:nasc,telefone:document.getElementById('col-tel').value.trim(),turno:document.getElementById('col-turno').value,ativo:true};
+    const res=await sbPost('colaboradoras',body);
+    if(res&&res[0]){
+      ['col-nome','col-cpf','col-nasc','col-tel'].forEach(id=>document.getElementById(id).value='');
+      showMsg('msg-cad-col','Cadastrada! Código: '+codigo,'ok');
+      mostrarLinkCol(res[0]);
+      renderTabelaColabs();
+    } else {
+      showMsg('msg-cad-col','Erro ao cadastrar.','err');
+    }
+  } finally {loading(false);}
+}
+
+function mostrarLinkCol(col){
+  const link=NETLIFY+'/?col='+col.codigo;
+  document.getElementById('link-modal-col').style.display='block';
+  document.getElementById('link-col-label').textContent=col.nome+' · '+TURNO_LABEL[col.turno];
+  document.getElementById('link-col-box').textContent=link;
+}
+
+async function renderTabelaColabs(){
+  loading(true,'Carregando colaboradoras...');
+  try{
+    const rows=await sbGet('colaboradoras','order=nome.asc');
+    document.getElementById('total-col').textContent='('+(rows||[]).length+')';
+    document.getElementById('tbody-col').innerHTML=!rows||rows.length===0
+      ?'<tr><td colspan="5" style="color:var(--text3);padding:16px 8px;text-align:center">Nenhuma colaboradora cadastrada.</td></tr>'
+      :rows.map(c=>`<tr>
+        <td><span class="code-tag">${c.codigo}</span></td>
+        <td style="font-weight:500">${c.nome}</td>
+        <td><span class="badge ${TURNO_CLS[c.turno]}">${TURNO_LABEL[c.turno]}</span></td>
+        <td><span class="${c.ativo?'badge ativo':'badge inativo'}" onclick="toggleCol('${c.id}',${!c.ativo})">${c.ativo?'Ativa':'Inativa'}</span></td>
+        <td style="display:flex;gap:4px">
+          <button class="btn sm" onclick='mostrarLinkCol(${JSON.stringify(c)})'><i class="ti ti-key"></i></button>
+          <button class="btn sm danger" onclick="excluirCol('${c.id}')"><i class="ti ti-trash"></i></button>
+        </td>
+      </tr>`).join('');
+  } finally {loading(false);}
+}
+
+async function toggleCol(id,ativo){await sbPatch('colaboradoras','id=eq.'+id,{ativo});renderTabelaColabs();}
+async function excluirCol(id){if(!confirm('Remover colaboradora?'))return;await sbDelete('colaboradoras','id=eq.'+id);renderTabelaColabs();}
+
+function copiar(boxId,okId){
+  const txt=document.getElementById(boxId).textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    document.getElementById(okId).textContent='Copiado!';
+    setTimeout(()=>document.getElementById(okId).textContent='',2000);
+  }).catch(()=>document.getElementById(okId).textContent='Copie manualmente.');
+}
+
+// ── AGENDA CLIENTE ──
+async function initClienteView(){
+  const c=currentUser;
+  document.getElementById('cli-header').style.display='flex';
+  document.getElementById('cli-avatar').textContent=iniciais(c.nome);
+  document.getElementById('cli-nome-hdr').textContent=c.nome;
+  document.getElementById('cli-info-hdr').textContent=c.creditos+' créditos · '+PAG_LABEL[c.pagamento]+(c.telefone?' · '+c.telefone:'');
+  // Calcula freq baseado nos créditos
+  const op=FREQ_OPCOES.slice().reverse().find(o=>c.creditos>=o.cred);
+  myFreq=op?op.freq:2;
+  renderFreqGrid();
+  renderHoraSel();
+  document.getElementById('turno-sel').onchange=renderHoraSel;
+  document.querySelectorAll('.day-pill').forEach(p=>{
+    p.onclick=()=>{
+      const sel=p.classList.contains('sel');
+      const cnt=document.querySelectorAll('.day-pill.sel').length;
+      if(!sel&&cnt>=myFreq){showMsg('freq-msg','Máximo de '+myFreq+' dia(s).','warn');return;}
+      p.classList.toggle('sel');showMsg('freq-msg','','');
+    };
+  });
+  // Carrega agendamentos do cliente
+  await carregarAgendamentos();
+  abrirApp('agenda');
+}
+
+async function carregarAgendamentos(){
+  const rows=await sbGet('agendamentos','cliente_codigo=eq.'+currentUser.codigo+'&order=data_slot.asc');
+  mySchedule=[];slots={};
+  if(rows&&rows.length>0){
+    // Também carrega todos agendamentos para contar vagas
+    const todos=await sbGet('agendamentos','select=data_slot,hora,cliente_codigo,cliente_nome');
+    if(todos) todos.forEach(r=>{
+      const sl=getSlot(r.data_slot,r.hora);
+      sl.count++;
+      if(!sl.names.includes(r.cliente_nome)) sl.names.push(r.cliente_nome);
+    });
+    rows.forEach(r=>{
+      getSlot(r.data_slot,r.hora).mine=true;
+      mySchedule.push({id:r.id,date:r.data_slot,hour:r.hora});
+    });
+  } else {
+    // Carrega vagas de outros mesmo sem agendamento próprio
+    const todos=await sbGet('agendamentos','select=data_slot,hora,cliente_nome');
+    if(todos) todos.forEach(r=>{const sl=getSlot(r.data_slot,r.hora);sl.count++;if(!sl.names.includes(r.cliente_nome))sl.names.push(r.cliente_nome);});
+  }
+}
+
+function renderFreqGrid(){
+  const creditos=currentUser.creditos;
+  const g=document.getElementById('freq-grid');g.innerHTML='';
+  FREQ_OPCOES.forEach(op=>{
+    const ok=creditos>=op.cred;
+    const b=document.createElement('button');
+    b.className='freq-btn'+(op.freq===myFreq?' sel':'');
+    b.disabled=!ok;
+    b.textContent=op.label;
+    b.title=op.cred+' créditos';
+    b.onclick=()=>{if(ok){myFreq=op.freq;renderFreqGrid();}};
+    g.appendChild(b);
+  });
+  document.getElementById('credits-badge').textContent=currentUser.creditos+' créditos';
+}
+
+function renderHoraSel(){
+  const turno=document.getElementById('turno-sel').value;
+  const horas=turno==='manha'?HORAS_MANHA:HORAS_TARDE;
+  const sel=document.getElementById('hora-sel');sel.innerHTML='';
+  horas.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=String(h).padStart(2,'0')+'h';sel.appendChild(o);});
+}
+
+async function salvarFrequencia(){
+  const days=[...document.querySelectorAll('.day-pill.sel')].map(p=>parseInt(p.dataset.d));
+  if(days.length!==myFreq){showMsg('freq-msg','Selecione exatamente '+myFreq+' dia(s).','err');return;}
+  const hora=parseInt(document.getElementById('hora-sel').value);
+  loading(true,'Salvando agendamentos...');
+  try{
+    // Remove agendamentos anteriores do cliente
+    await sbDelete('agendamentos','cliente_codigo=eq.'+currentUser.codigo);
+    // Recalcula slots sem os agendamentos antigos
+    mySchedule.forEach(s=>{
+      const sl=getSlot(s.date,s.hour);
+      sl.count=Math.max(0,sl.count-1);
+      sl.mine=false;
+      const ni=sl.names.indexOf(currentUser.nome);if(ni>-1)sl.names.splice(ni,1);
+    });
+    mySchedule=[];
+    const ws=getWeekMon(0);
+    const novos=[];
+    for(let w=0;w<4;w++){
+      const weekStart=new Date(ws);weekStart.setDate(weekStart.getDate()+w*7);
+      days.forEach(d=>{
+        const dt=new Date(weekStart);dt.setDate(dt.getDate()+d-1);
+        const dk=toKey(dt);
+        if(isHoliday(dt)||isWeekend(dt)) return;
+        const sl=getSlot(dk,hora);
+        if(sl.count<MAX){
+          novos.push({cliente_codigo:currentUser.codigo,cliente_nome:currentUser.nome,data_slot:dk,hora});
+        }
+      });
+    }
+    if(novos.length>0){
+      const res=await sbPost('agendamentos',novos);
+      if(res) res.forEach(r=>{
+        const sl=getSlot(r.data_slot,r.hora);
+        sl.mine=true;sl.count++;
+        if(!sl.names.includes(currentUser.nome)) sl.names.push(currentUser.nome);
+        mySchedule.push({id:r.id,date:r.data_slot,hour:r.hora});
+      });
+    }
+    showMsg('freq-msg',mySchedule.length+' sessões agendadas (4 semanas).','ok');
+    renderGridCliente();
+  } finally {loading(false);}
+}
+
+function renderGridCliente(){
+  const ws=getWeekMon(wkOff.cli);
+  document.getElementById('week-cli').textContent=fmtWeek(ws);
+  const days=[];for(let i=0;i<5;i++){const d=new Date(ws);d.setDate(d.getDate()+i);days.push(d);}
+  let html='<div class="grid grid-5"><div class="gh"></div>';
+  days.forEach(d=>{const today=toKey(d)===toKey(new Date());html+=`<div class="gh${today?' today-col':''}">${DIAS[d.getDay()]}<br><span style="font-size:9px">${d.getDate()}/${d.getMonth()+1}</span></div>`;});
+  ALL_HORAS.forEach(h=>{
+    const isManha=HORAS_MANHA.includes(h);
+    const badge=`<span class="badge ${isManha?'manha':'tarde'}" style="font-size:8px;padding:1px 3px">${isManha?'T':'R'}</span>`;
+    html+=`<div class="tlabel">${badge}${String(h).padStart(2,'0')}h</div>`;
+    days.forEach(d=>{
+      const dk=toKey(d);const sl=getSlot(dk,h);const hol=isHoliday(d);const bl4=isBlocked4h(dk,h);
+      if(hol){html+=`<div class="slot holiday"><span style="font-size:8px;color:var(--yellow)">Fer</span></div>`;return;}
+      const cls=sl.mine?'mine':sl.count>=MAX?'full':'free';
+      const isLocked=sl.mine&&bl4;
+      const oc=sl.mine&&!bl4?` onclick="tryAlter('${dk}',${h})"`:!sl.mine&&sl.count<MAX&&!bl4?` onclick="bookSlot('${dk}',${h})"`:''
+      html+=`<div class="slot ${cls}${isLocked?' locked':''}"${oc}>${isLocked?'<i class="ti ti-lock" style="font-size:8px;color:var(--text3)"></i>':''}<span class="slot-count">${sl.count}/${MAX}</span></div>`;
+    });
+  });
+  html+='</div>';
+  document.getElementById('grid-cli').innerHTML=html;
+}
+
+async function bookSlot(dk,h){
+  if(isBlocked4h(dk,h)){showMsg('alter-msg','Bloqueado: menos de 4h de antecedência.','err');return;}
+  const sl=getSlot(dk,h);
+  if(sl.count>=MAX){showMsg('alter-msg','Horário lotado.','err');return;}
+  loading(true,'Agendando...');
+  try{
+    const res=await sbPost('agendamentos',{cliente_codigo:currentUser.codigo,cliente_nome:currentUser.nome,data_slot:dk,hora:h});
+    if(res&&res[0]){
+      sl.mine=true;sl.count++;if(!sl.names.includes(currentUser.nome))sl.names.push(currentUser.nome);
+      mySchedule.push({id:res[0].id,date:dk,hour:h});
+      renderGridCliente();showMsg('alter-msg','Horário agendado!','ok');
+    }
+  } finally {loading(false);}
+}
+
+function tryAlter(dk,h){
+  if(isBlocked4h(dk,h)){showMsg('alter-msg','Alteração bloqueada: menos de 4h.','err');return;}
+  showMsg('alter-msg','Toque em outro slot livre para reagendar.','warn');
+}
+
+function navSemana(d,s){wkOff[s]+=d;if(s==='cli')renderGridCliente();if(s==='col')renderPresencas();if(s==='avail')renderAvailGrid();}
+
+// ── PRESENÇAS ──
+async function initPresencas(){
+  loading(true,'Carregando presenças...');
+  try{
+    // Carrega agendamentos da semana
+    const ws=getWeekMon(wkOff.col);
+    const we=new Date(ws);we.setDate(we.getDate()+6);
+    const agend=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&order=data_slot.asc,hora.asc`);
+    // Recria slots
+    slots={};
+    if(agend) agend.forEach(r=>{const sl=getSlot(r.data_slot,r.hora);sl.count++;if(!sl.names.includes(r.cliente_nome))sl.names.push(r.cliente_nome);});
+    // Carrega presenças salvas
+    const pres=await sbGet('presencas',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}`);
+    presencasMap={};
+    if(pres) pres.forEach(p=>{presencasMap[`${p.data_slot}_${p.hora}_${p.tipo}_${p.codigo}`]=p.status;});
+    renderPresencas();
+  } finally {loading(false);}
+}
+
+function renderPresencas(){
+  const ws=getWeekMon(wkOff.col);
+  document.getElementById('week-col').textContent=fmtWeek(ws);
+  const horasVisiveis=currentUser.tipo==='admin'?ALL_HORAS:h4t(currentUser.turno);
+  const rows=[];
+  for(let i=0;i<5;i++){
+    const d=new Date(ws);d.setDate(d.getDate()+i);const dk=toKey(d);
+    if(isHoliday(d)) continue;
+    horasVisiveis.forEach(h=>{
+      const sl=getSlot(dk,h);
+      if(sl.count>0) rows.push({date:dk,hour:h,isManha:HORAS_MANHA.includes(h),count:sl.count,names:sl.names});
+    });
+  }
+  let totalP=0,totalF=0,totalFJ=0;
+  Object.values(presencasMap).forEach(v=>{if(v==='P')totalP++;else if(v==='F')totalF++;else if(v==='FJ')totalFJ++;});
+  const tot=totalP+totalF+totalFJ||1;
+  document.getElementById('stat-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${totalP}</div><div class="stat-lbl">Presenças</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red)">${totalF}</div><div class="stat-lbl">Faltas</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--yellow)">${totalFJ}</div><div class="stat-lbl">Faltas just.</div></div>
+    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">Presença</div></div>`;
+  const tbody=document.getElementById('tbody-presencas');
+  if(rows.length===0){tbody.innerHTML='<tr><td colspan="6" style="color:var(--text3);padding:16px 8px;text-align:center">Nenhuma sessão esta semana.</td></tr>';return;}
+  tbody.innerHTML=rows.map(r=>{
+    const fmt=new Date(r.date+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
+    const svA=presencasMap[`${r.date}_${r.hour}_aluno_geral`]||'';
+    const svI=presencasMap[`${r.date}_${r.hour}_instrutora_${r.isManha?'thayane':'rebeka'}`]||'';
+    const ck=`${r.date}_${r.hour}`;
+    return`<tr>
+      <td style="white-space:nowrap">${fmt}</td>
+      <td>${String(r.hour).padStart(2,'0')}h</td>
+      <td><span class="badge ${r.isManha?'manha':'tarde'}" style="font-size:9px">${r.isManha?'TH':'RE'}</span></td>
+      <td style="font-size:10px;color:var(--text3);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.names.join(', ')||r.count+'×'}</td>
+      <td><select class="status-sel" onchange="setPresenca('${ck}','aluno','geral',this.value)">
+        <option value="" ${svA===''?'selected':''}>—</option>
+        <option value="P" ${svA==='P'?'selected':''}>P</option>
+        <option value="F" ${svA==='F'?'selected':''}>F</option>
+        <option value="FJ" ${svA==='FJ'?'selected':''}>FJ</option>
+      </select></td>
+      <td><select class="status-sel" onchange="setPresenca('${ck}','instrutora','${r.isManha?'thayane':'rebeka'}',this.value)">
+        <option value="" ${svI===''?'selected':''}>—</option>
+        <option value="P" ${svI==='P'?'selected':''}>P</option>
+        <option value="F" ${svI==='F'?'selected':''}>F</option>
+        <option value="FJ" ${svI==='FJ'?'selected':''}>FJ</option>
+      </select></td>
+    </tr>`;
+  }).join('');
+}
+
+function setPresenca(ck,tipo,codigo,val){
+  presencasMap[`${ck}_${tipo}_${codigo}`]=val;
+}
+
+async function salvarPresencas(){
+  loading(true,'Salvando presenças...');
+  try{
+    const upserts=Object.entries(presencasMap).map(([k,status])=>{
+      const parts=k.split('_');
+      // formato: data_slot(YYYY-MM-DD) _ hora _ tipo _ codigo
+      // data_slot tem 3 partes com hífen
+      const data_slot=parts.slice(0,3).join('-');
+      const hora=parseInt(parts[3]);
+      const tipo=parts[4];
+      const codigo=parts.slice(5).join('_');
+      return{data_slot,hora,tipo,codigo,status};
+    }).filter(r=>r.status);
+    if(upserts.length>0) await sbUpsert('presencas',upserts);
+    document.getElementById('msg-presenca').textContent='Salvo!';
+    setTimeout(()=>document.getElementById('msg-presenca').textContent='',2500);
+  } finally {loading(false);}
+}
+
+// ── VAGAS ──
+async function initVagas(){
+  document.getElementById('avail-date').value=toKey(new Date());
+  renderAvailHoras();
+  loading(true,'Carregando disponibilidade...');
+  try{
+    const ws=getWeekMon(wkOff.avail);
+    const we=new Date(ws);we.setDate(we.getDate()+6);
+    const rows=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&select=data_slot,hora`);
+    slots={};
+    if(rows) rows.forEach(r=>{const sl=getSlot(r.data_slot,r.hora);sl.count++;});
+    renderAvailGrid();
+  } finally {loading(false);}
+}
+
+function renderAvailHoras(){
+  const turno=document.getElementById('avail-turno').value;
+  const horas=turno==='manha'?HORAS_MANHA:HORAS_TARDE;
+  const sel=document.getElementById('avail-hora');sel.innerHTML='';
+  horas.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=String(h).padStart(2,'0')+'h';sel.appendChild(o);});
+}
+
+async function verificarVaga(){
+  const dt=document.getElementById('avail-date').value;
+  const h=parseInt(document.getElementById('avail-hora').value);
+  const res=document.getElementById('avail-result');
+  if(!dt){res.innerHTML='<div class="alert err">Selecione uma data.</div>';return;}
+  const d=new Date(dt+'T12:00');
+  if(isHoliday(d)){res.innerHTML='<div class="alert warn">Feriado nacional — sem atendimento.</div>';return;}
+  if(isWeekend(d)){res.innerHTML='<div class="alert warn">Sem atendimento no final de semana.</div>';return;}
+  loading(true,'Verificando...');
+  try{
+    const rows=await sbGet('agendamentos',`data_slot=eq.${dt}&hora=eq.${h}&select=id`);
+    const count=(rows||[]).length;const livre=MAX-count;
+    const inst=HORAS_MANHA.includes(h)?'Thayane':'Rebeka';
+    res.innerHTML=livre<=0
+      ?`<div class="alert err">Lotado — 0 vagas às ${String(h).padStart(2,'0')}h · ${inst}</div>`
+      :`<div class="alert ok">${livre} de ${MAX} vagas às ${String(h).padStart(2,'0')}h · ${inst}</div>`;
+  } finally {loading(false);}
+}
+
+async function renderAvailGrid(){
+  const ws=getWeekMon(wkOff.avail);
+  document.getElementById('week-avail').textContent=fmtWeek(ws);
+  const days=[];for(let i=0;i<5;i++){const d=new Date(ws);d.setDate(d.getDate()+i);days.push(d);}
+  let livreTotal=0,lotados=0;
+  days.forEach(d=>{if(isHoliday(d)||isWeekend(d))return;ALL_HORAS.forEach(h=>{const sl=getSlot(toKey(d),h);if(sl.count>=MAX)lotados++;else livreTotal+=MAX-sl.count;});});
+  document.getElementById('avail-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${livreTotal}</div><div class="stat-lbl">Vagas livres</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--red)">${lotados}</div><div class="stat-lbl">Lotados</div></div>
+    <div class="stat-card"><div class="stat-num">${HORAS_MANHA.length*5}</div><div class="stat-lbl">Slots manhã</div></div>
+    <div class="stat-card"><div class="stat-num">${HORAS_TARDE.length*5}</div><div class="stat-lbl">Slots tarde</div></div>`;
+  let html='<div class="grid grid-5"><div class="gh"></div>';
+  days.forEach(d=>{const today=toKey(d)===toKey(new Date());html+=`<div class="gh${today?' today-col':''}">${DIAS[d.getDay()]}<br><span style="font-size:9px">${d.getDate()}/${d.getMonth()+1}</span></div>`;});
+  ALL_HORAS.forEach(h=>{
+    const isManha=HORAS_MANHA.includes(h);
+    const badge=`<span class="badge ${isManha?'manha':'tarde'}" style="font-size:8px;padding:1px 3px">${isManha?'T':'R'}</span>`;
+    html+=`<div class="tlabel">${badge}${String(h).padStart(2,'0')}h</div>`;
+    days.forEach(d=>{
+      const dk=toKey(d);const sl=getSlot(dk,h);
+      if(isHoliday(d)){html+=`<div class="slot holiday"><span style="font-size:8px;color:var(--yellow)">Fer</span></div>`;return;}
+      const livre=MAX-sl.count;const cls=sl.count>=MAX?'full':'free';
+      const cor=sl.count>=MAX?'var(--red)':sl.count>=3?'var(--yellow)':'var(--green)';
+      html+=`<div class="slot ${cls}" style="cursor:default"><span class="slot-count" style="color:${cor}">${livre}v</span></div>`;
+    });
+  });
+  html+='</div>';document.getElementById('grid-avail').innerHTML=html;
+}
+
+// ── LOGIN AUTOMÁTICO VIA URL ──
+function verificarLoginURL(){
+  const params=new URLSearchParams(window.location.search);
+  const codCli=params.get('c');
+  const codCol=params.get('col');
+  if(codCli){
+    document.getElementById('login-tipo').value='cliente';loginTipoChange();
+    document.getElementById('cli-codigo').value=codCli.toUpperCase();
+    showMsg('login-msg','Olá! Informe sua data de nascimento para entrar.','info');
+    window.history.replaceState({},'',window.location.pathname);
+  }
+  if(codCol){
+    document.getElementById('login-tipo').value='colaborador';loginTipoChange();
+    document.getElementById('colab-codigo').value=codCol.toUpperCase();
+    showMsg('login-msg','Olá! Informe sua data de nascimento para entrar.','info');
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
+window.addEventListener('DOMContentLoaded',verificarLoginURL);
+
+// ── PWA ──
+const manifest={name:'Reviva Pilates',short_name:'Reviva',description:'Agenda digital Reviva Pilates',start_url:'.',display:'standalone',background_color:'#0f0f1a',theme_color:'#1a1a2e',orientation:'portrait',icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="%231a1a2e"/><text x="96" y="130" font-size="100" text-anchor="middle" fill="%23c084fc" font-family="serif">R</text></svg>',sizes:'192x192',type:'image/svg+xml'}]};
+const mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+document.getElementById('manifest-link').href=URL.createObjectURL(mblob);
+if('serviceWorker' in navigator){
+  const sw=`const C='reviva-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.add('/'))));self.addEventListener('fetch',e=>{if(e.request.url.includes('supabase'))return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+</script>
+</body>
+</html>
