@@ -216,6 +216,7 @@ input,select,button,textarea{font-family:var(--font)}
   <div class="tab-row">
     <button class="tab-btn active" id="tab-cli-btn" onclick="switchTab('cli')">Clientes</button>
     <button class="tab-btn" id="tab-col-btn" onclick="switchTab('col')">Colaboradoras</button>
+    <button class="tab-btn" id="tab-exp-btn" onclick="switchTab('exp')">Experimentais</button>
   </div>
   <div id="tab-cli">
     <div class="card">
@@ -302,6 +303,41 @@ input,select,button,textarea{font-family:var(--font)}
       <div style="overflow-x:auto"><table class="data-table"><thead><tr>
         <th>Código</th><th>Nome</th><th>Turno</th><th>Status</th><th></th>
       </tr></thead><tbody id="tbody-col"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ABA EXPERIMENTAIS -->
+  <div id="tab-exp" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-flask"></i> Agendar aula experimental</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Cadastre o interessado e agende a aula experimental. Converta para cliente fixo com um clique.</div>
+      <div class="field-row">
+        <div class="field"><label>Nome *</label><input type="text" id="exp-nome" placeholder="Nome completo"></div>
+        <div class="field"><label>Telefone *</label><input type="tel" id="exp-tel" placeholder="(81) 9 0000-0000"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Data da aula *</label><input type="date" id="exp-data"></div>
+        <div class="field"><label>Turno</label>
+          <select id="exp-turno" onchange="renderExpHoras()">
+            <option value="manha">Manhã — Thayane</option>
+            <option value="tarde">Tarde — Rebeka</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Horário</label><select id="exp-hora"></select></div>
+        <div class="field"><label>Observação</label><input type="text" id="exp-obs" placeholder="Ex: indicação, interesse..."></div>
+      </div>
+      <button class="btn primary full" onclick="agendarExperimental()" style="margin-top:4px"><i class="ti ti-calendar-plus"></i> Agendar experimental</button>
+      <div id="msg-exp"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-list"></i> Experimentais <span id="total-exp" style="font-size:11px;font-weight:400;color:var(--text3)"></span></div>
+      <div style="overflow-x:auto">
+        <table class="data-table"><thead><tr>
+          <th>Nome</th><th>Telefone</th><th>Data</th><th>Hora</th><th>Inst.</th><th>Obs.</th><th>Status</th><th></th>
+        </tr></thead><tbody id="tbody-exp"></tbody></table>
+      </div>
     </div>
   </div>
 </div>
@@ -603,13 +639,22 @@ function setMode(m){
   const nb=document.getElementById('nav-'+m);if(nb)nb.classList.add('active');
   if(m==='agenda'){switchAgendaTab('freq');renderGridCliente();}
   if(m==='presencas') initPresencas();
-  if(m==='cadastros'){renderTabelaClientes();renderTabelaColabs();}
+  if(m==='cadastros'){renderTabelaClientes();renderTabelaColabs();renderTabelaExperimentais();}
   if(m==='vagas') initVagas();
   window.scrollTo(0,0);
 }
 
 function switchTab(tab){
-  ['cli','col'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===tab?'block':'none';document.getElementById('tab-'+t+'-btn').classList.toggle('active',t===tab);});
+  ['cli','col','exp'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('tab-'+t+'-btn').classList.toggle('active',t===tab);
+  });
+  if(tab==='exp'){
+    renderExpHoras();
+    // pré-preenche data com hoje
+    if(!document.getElementById('exp-data').value) document.getElementById('exp-data').value=toKey(new Date());
+    renderTabelaExperimentais();
+  }
 }
 
 function switchAgendaTab(tab){
@@ -659,9 +704,10 @@ async function renderTabelaClientes(){
         <td><span class="code-tag">${c.codigo}</span></td>
         <td style="font-weight:500">${c.nome}</td>
         <td>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-weight:500;color:var(--accent)">${c.creditos}</span>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-weight:500;color:var(--accent);min-width:20px;text-align:center">${c.creditos}</span>
             <button class="btn sm success" onclick="adicionarCreditos('${c.id}','${c.nome}',${c.creditos})" title="Adicionar créditos"><i class="ti ti-plus"></i></button>
+            <button class="btn sm danger" onclick="reduzirCreditos('${c.id}','${c.nome}',${c.creditos})" title="Reduzir créditos"><i class="ti ti-minus"></i></button>
           </div>
         </td>
         <td><span class="badge ${PAG_CLS[c.pagamento]||'pix'}">${PAG_LABEL[c.pagamento]||'PIX'}</span></td>
@@ -682,7 +728,20 @@ async function adicionarCreditos(id,nome,atual){
   loading(true,'Atualizando créditos...');
   try{
     await sbPatch('clientes','id=eq.'+id,{creditos:novo});
-    showMsg('msg-cad-cli',`+${qtd} créditos adicionados para ${nome}. Total: ${novo}`, 'ok');
+    showMsg('msg-cad-cli',`+${qtd} créditos adicionados para ${nome}. Total: ${novo}`,'ok');
+    renderTabelaClientes();
+  } finally{loading(false);}
+}
+
+async function reduzirCreditos(id,nome,atual){
+  const qtd=prompt(`Reduzir créditos de ${nome}\nCréditos atuais: ${atual}\n\nQuantos créditos deseja reduzir?`);
+  if(!qtd||isNaN(parseInt(qtd))||parseInt(qtd)<=0) return;
+  const novo=atual-parseInt(qtd);
+  if(novo<0){alert(`Não é possível reduzir ${qtd} créditos. ${nome} tem apenas ${atual}.`);return;}
+  loading(true,'Atualizando créditos...');
+  try{
+    await sbPatch('clientes','id=eq.'+id,{creditos:novo});
+    showMsg('msg-cad-cli',`-${qtd} créditos removidos de ${nome}. Total: ${novo}`,'ok');
     renderTabelaClientes();
   } finally{loading(false);}
 }
@@ -885,14 +944,19 @@ function solicitarCancelamento(agendId,dk,h){
   document.getElementById('modal-cancel').style.display='flex';
 }
 
-function fecharModal(){document.getElementById('modal-cancel').style.display='none';cancelTarget=null;}
+function fecharModal(){document.getElementById('modal-cancel').style.display='none';}
 
 async function confirmarCancelamento(){
-  if(!cancelTarget) return;
+  if(!cancelTarget){showMsg('alter-msg','Erro: agendamento não identificado.','err');fecharModal();return;}
+  const target={...cancelTarget};
   fecharModal();
   loading(true,'Cancelando...');
   try{
-    await sbDelete('agendamentos','id=eq.'+cancelTarget.id);
+    // Deleta pelo id se existir, senão deleta por data+hora+cliente
+    let filtro=target.id
+      ?'id=eq.'+target.id
+      :`data_slot=eq.${target.date}&hora=eq.${target.hour}&cliente_codigo=eq.${currentUser.codigo}`;
+    await sbDelete('agendamentos',filtro);
     // Devolve 1 crédito
     const novoCred=currentUser.creditos+1;
     await sbPatch('clientes','id=eq.'+currentUser.id,{creditos:novoCred});
@@ -903,6 +967,9 @@ async function confirmarCancelamento(){
     renderGridCliente();
     renderMeusAgendamentos();
     showMsg('alter-msg','Agendamento cancelado. Crédito devolvido! Total: '+currentUser.creditos,'ok');
+    cancelTarget=null;
+  } catch(e){
+    showMsg('alter-msg','Erro ao cancelar. Tente novamente.','err');
   } finally{loading(false);}
 }
 
@@ -1106,6 +1173,96 @@ async function renderAvailGrid(){
     });
   });
   html+='</div>';document.getElementById('grid-avail').innerHTML=html;
+}
+
+// ── EXPERIMENTAIS ──
+function renderExpHoras(){
+  const turno=document.getElementById('exp-turno')?.value||'manha';
+  const horas=turno==='manha'?HORAS_MANHA:HORAS_TARDE;
+  const sel=document.getElementById('exp-hora');if(!sel)return;sel.innerHTML='';
+  horas.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=String(h).padStart(2,'0')+'h';sel.appendChild(o);});
+}
+
+async function agendarExperimental(){
+  const nome=document.getElementById('exp-nome').value.trim();
+  const tel=document.getElementById('exp-tel').value.trim();
+  const data=document.getElementById('exp-data').value;
+  const hora=parseInt(document.getElementById('exp-hora').value);
+  const obs=document.getElementById('exp-obs').value.trim();
+  if(!nome||!tel||!data){showMsg('msg-exp','Nome, telefone e data são obrigatórios.','err');return;}
+  const d=new Date(data+'T12:00');
+  if(isHoliday(d)){showMsg('msg-exp','Esta data é feriado — sem atendimento.','warn');return;}
+  if(isWeekend(d)){showMsg('msg-exp','Sem atendimento no final de semana.','warn');return;}
+  // Verifica vagas
+  const rows=await sbGet('agendamentos',`data_slot=eq.${data}&hora=eq.${hora}&select=id`);
+  if((rows||[]).length>=MAX){showMsg('msg-exp','Horário lotado. Escolha outro.','err');return;}
+  loading(true,'Agendando experimental...');
+  try{
+    const body={nome,telefone:tel,data_slot:data,hora,observacao:obs,status:'agendado'};
+    const res=await sbPost('experimentais',body);
+    if(res&&res[0]){
+      ['exp-nome','exp-tel','exp-obs'].forEach(id=>document.getElementById(id).value='');
+      showMsg('msg-exp','Experimental agendado para '+new Date(data+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})+' às '+String(hora).padStart(2,'0')+'h!','ok');
+      renderTabelaExperimentais();
+    } else showMsg('msg-exp','Erro ao agendar. Verifique o console.','err');
+  } finally{loading(false);}
+}
+
+async function renderTabelaExperimentais(){
+  try{
+    const rows=await sbGet('experimentais','order=data_slot.desc,hora.desc');
+    document.getElementById('total-exp').textContent='('+(rows||[]).length+')';
+    const tbody=document.getElementById('tbody-exp');
+    if(!rows||rows.length===0){tbody.innerHTML='<tr><td colspan="8" style="color:var(--text3);padding:16px;text-align:center">Nenhum experimental agendado.</td></tr>';return;}
+    tbody.innerHTML=rows.map(e=>{
+      const isManha=HORAS_MANHA.includes(e.hora);
+      const dt=new Date(e.data_slot+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+      const statusCls=e.status==='convertido'?'badge ativo':e.status==='cancelado'?'badge inativo':'badge admin';
+      const statusLabel=e.status==='convertido'?'Convertido':e.status==='cancelado'?'Cancelado':'Agendado';
+      return`<tr>
+        <td style="font-weight:500">${e.nome}</td>
+        <td style="font-size:10px;color:var(--text2)">${e.telefone}</td>
+        <td>${dt}</td>
+        <td>${String(e.hora).padStart(2,'0')}h</td>
+        <td><span class="badge ${isManha?'manha':'tarde'}" style="font-size:9px">${isManha?'TH':'RE'}</span></td>
+        <td style="font-size:10px;color:var(--text3);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.observacao||'—'}</td>
+        <td><span class="${statusCls}">${statusLabel}</span></td>
+        <td>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            ${e.status==='agendado'?`<button class="btn sm success" onclick="converterParaCliente('${e.id}','${e.nome.replace(/'/g,"\\'")}','${e.telefone}')" title="Converter para cliente"><i class="ti ti-user-check"></i></button>`:''}
+            ${e.status==='agendado'?`<button class="btn sm danger" onclick="cancelarExperimental('${e.id}')" title="Cancelar"><i class="ti ti-x"></i></button>`:''}
+            <button class="btn sm danger" onclick="excluirExperimental('${e.id}')"><i class="ti ti-trash"></i></button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(err){console.error(err);}
+}
+
+async function cancelarExperimental(id){
+  if(!confirm('Cancelar este experimental?')) return;
+  loading(true,'Cancelando...');
+  try{await sbPatch('experimentais','id=eq.'+id,{status:'cancelado'});renderTabelaExperimentais();}
+  finally{loading(false);}
+}
+
+async function excluirExperimental(id){
+  if(!confirm('Excluir este registro permanentemente?')) return;
+  loading(true,'Excluindo...');
+  try{await sbDelete('experimentais','id=eq.'+id);renderTabelaExperimentais();}
+  finally{loading(false);}
+}
+
+async function converterParaCliente(expId,nome,telefone){
+  // Pré-preenche o formulário de cadastro de cliente e muda para aba Clientes
+  switchTab('cli');
+  document.getElementById('c-nome').value=nome;
+  document.getElementById('c-tel').value=telefone;
+  // Marca o experimental como convertido
+  await sbPatch('experimentais','id=eq.'+expId,{status:'convertido'});
+  // Sinaliza ao usuário
+  showMsg('msg-cad-cli','Dados preenchidos automaticamente. Complete o CPF, nascimento e créditos para finalizar o cadastro.','info');
+  window.scrollTo(0,0);
 }
 
 // ── LOGIN AUTO VIA URL ──
