@@ -45,7 +45,7 @@ input,select,button,textarea{font-family:var(--font)}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--text3);font-size:9px;font-weight:500;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:0.05em;transition:all .15s}
 .nav-btn i{font-size:20px}
 .nav-btn.active{color:var(--accent);background:var(--accent-dim)}
-.main{flex:1;padding:16px 16px calc(var(--safe-bottom)+80px)}
+.main{flex:1;padding:16px 16px calc(var(--safe-bottom)+80px);overflow-y:auto}
 .screen{display:none}.screen.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
@@ -441,7 +441,7 @@ input,select,button,textarea{font-family:var(--font)}
     <div class="card-title"><i class="ti ti-clipboard-list"></i> Registro de presença</div>
     <div style="overflow-x:auto">
       <table class="data-table">
-        <thead><tr><th>Data</th><th>Hora</th><th>Inst.</th><th>Alunos</th><th>Aluno</th><th>Instrutora</th></tr></thead>
+        <thead><tr><th>Data</th><th>Hora</th><th>Inst.</th><th>Aluno</th><th>P/F/FJ</th></tr></thead>
         <tbody id="tbody-presencas"></tbody>
       </table>
     </div>
@@ -544,13 +544,14 @@ function h4t(t){return t==='manha'?HORAS_MANHA:t==='tarde'?HORAS_TARDE:ALL_HORAS
 function loading(show,txt='Aguarde...'){document.getElementById('loading').style.display=show?'flex':'none';document.getElementById('loading-text').textContent=txt;}
 function showMsg(id,txt,type){const el=document.getElementById(id);if(el)el.innerHTML=txt?`<div class="alert ${type}">${txt}</div>`:'';}
 function creditos(){return currentUser?currentUser.creditos:0;}
+// Créditos livres = créditos no banco (já descontados a cada agendamento/cancelamento)
+function creditosLivres(){return Math.max(0,creditos());}
 function creditosUsados(){return mySchedule.filter(s=>new Date(s.date+'T'+String(s.hour).padStart(2,'0')+':00')>new Date()).length;}
-function creditosLivres(){return Math.max(0,creditos()-creditosUsados());}
 function atualizarCredBar(){
   const livre=creditosLivres();
   const usado=creditosUsados();
   document.getElementById('cred-num').textContent=creditos();
-  document.getElementById('cred-sub').textContent=usado+' agendado(s) · '+livre+' livre(s)';
+  document.getElementById('cred-sub').textContent=usado+' agendado(s) · '+livre+' crédito(s) disponível(is)';
   document.getElementById('cred-num').style.color=livre===0?'var(--red)':livre<=2?'var(--yellow)':'var(--accent)';
 }
 
@@ -1035,7 +1036,13 @@ async function initPresencas(){
     const we=new Date(ws);we.setDate(we.getDate()+6);
     const agend=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&order=data_slot.asc,hora.asc`);
     slots={};
-    if(agend) agend.forEach(r=>{const sl=getSlot(r.data_slot,r.hora);sl.count++;if(!sl.names.includes(r.cliente_nome))sl.names.push(r.cliente_nome);});
+    if(agend) agend.forEach(r=>{
+      const sl=getSlot(r.data_slot,r.hora);
+      sl.count++;
+      if(!sl.names.includes(r.cliente_nome)) sl.names.push(r.cliente_nome);
+      if(!sl.agendamentos) sl.agendamentos=[];
+      sl.agendamentos.push({nome:r.cliente_nome,codigo:r.cliente_codigo});
+    });
     const pres=await sbGet('presencas',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}`);
     presencasMap={};
     if(pres) pres.forEach(p=>{presencasMap[`${p.data_slot}_${p.hora}_${p.tipo}_${p.codigo}`]=p.status;});
@@ -1047,42 +1054,53 @@ function renderPresencas(){
   const ws=getWeekMon(wkOff.col);
   document.getElementById('week-col').textContent=fmtWeek(ws);
   const horasVisiveis=currentUser.tipo==='admin'?ALL_HORAS:h4t(currentUser.turno);
+  // Monta linhas: uma por aluno por horário
   const rows=[];
   for(let i=0;i<5;i++){
     const d=new Date(ws);d.setDate(d.getDate()+i);const dk=toKey(d);
     if(isHoliday(d)) continue;
-    horasVisiveis.forEach(h=>{const sl=getSlot(dk,h);if(sl.count>0) rows.push({date:dk,hour:h,isManha:HORAS_MANHA.includes(h),count:sl.count,names:sl.names});});
+    horasVisiveis.forEach(h=>{
+      const sl=getSlot(dk,h);
+      if(sl.count>0){
+        // Cada agendamento salvo tem nome — usamos agendSemana para pegar codigos
+        (sl.agendamentos||[{nome:sl.names[0]||'—',codigo:'geral'}]).forEach(ag=>{
+          rows.push({date:dk,hour:h,isManha:HORAS_MANHA.includes(h),nome:ag.nome,codigo:ag.codigo});
+        });
+        // fallback se agendamentos não populado: linha por nome
+        if(!sl.agendamentos&&sl.names.length>0){
+          rows.splice(rows.length-1,1);
+          sl.names.forEach(nome=>rows.push({date:dk,hour:h,isManha:HORAS_MANHA.includes(h),nome,codigo:nome.replace(/\s+/g,'_').toLowerCase()}));
+        }
+      }
+    });
   }
+  // Estatísticas só de alunos
   let totalP=0,totalF=0,totalFJ=0;
-  Object.values(presencasMap).forEach(v=>{if(v==='P')totalP++;else if(v==='F')totalF++;else if(v==='FJ')totalFJ++;});
+  Object.entries(presencasMap).forEach(([k,v])=>{
+    if(k.includes('_aluno_')){if(v==='P')totalP++;else if(v==='F')totalF++;else if(v==='FJ')totalFJ++;}
+  });
   const tot=totalP+totalF+totalFJ||1;
   document.getElementById('stat-grid').innerHTML=`
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">${totalP}</div><div class="stat-lbl">Presenças</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--red)">${totalF}</div><div class="stat-lbl">Faltas</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--yellow)">${totalFJ}</div><div class="stat-lbl">Faltas just.</div></div>
-    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">Presença</div></div>`;
+    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">% Presença</div></div>`;
   const tbody=document.getElementById('tbody-presencas');
-  if(rows.length===0){tbody.innerHTML='<tr><td colspan="6" style="color:var(--text3);padding:16px;text-align:center">Nenhuma sessão esta semana.</td></tr>';return;}
+  if(rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--text3);padding:16px;text-align:center">Nenhuma sessão esta semana.</td></tr>';return;}
   tbody.innerHTML=rows.map(r=>{
     const fmt=new Date(r.date+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
-    const svA=presencasMap[`${r.date}_${r.hour}_aluno_geral`]||'';
-    const svI=presencasMap[`${r.date}_${r.hour}_instrutora_${r.isManha?'thayane':'rebeka'}`]||'';
+    const chave=`${r.date}_${r.hour}_aluno_${r.codigo}`;
+    const sv=presencasMap[chave]||'';
     return`<tr>
       <td style="white-space:nowrap">${fmt}</td>
       <td>${String(r.hour).padStart(2,'0')}h</td>
       <td><span class="badge ${r.isManha?'manha':'tarde'}" style="font-size:9px">${r.isManha?'TH':'RE'}</span></td>
-      <td style="font-size:10px;color:var(--text3);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.names.join(', ')||r.count+'×'}</td>
-      <td><select class="status-sel" onchange="setPresenca('${r.date}_${r.hour}','aluno','geral',this.value)">
-        <option value="" ${svA===''?'selected':''}>—</option>
-        <option value="P" ${svA==='P'?'selected':''}>P</option>
-        <option value="F" ${svA==='F'?'selected':''}>F</option>
-        <option value="FJ" ${svA==='FJ'?'selected':''}>FJ</option>
-      </select></td>
-      <td><select class="status-sel" onchange="setPresenca('${r.date}_${r.hour}','instrutora','${r.isManha?'thayane':'rebeka'}',this.value)">
-        <option value="" ${svI===''?'selected':''}>—</option>
-        <option value="P" ${svI==='P'?'selected':''}>P</option>
-        <option value="F" ${svI==='F'?'selected':''}>F</option>
-        <option value="FJ" ${svI==='FJ'?'selected':''}>FJ</option>
+      <td style="font-size:11px;font-weight:500">${r.nome}</td>
+      <td><select class="status-sel" onchange="setPresenca('${r.date}_${r.hour}','aluno','${r.codigo}',this.value)">
+        <option value="" ${sv===''?'selected':''}>—</option>
+        <option value="P" ${sv==='P'?'selected':''}>P</option>
+        <option value="F" ${sv==='F'?'selected':''}>F</option>
+        <option value="FJ" ${sv==='FJ'?'selected':''}>FJ</option>
       </select></td>
     </tr>`;
   }).join('');
