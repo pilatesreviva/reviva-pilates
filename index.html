@@ -37,51 +37,58 @@ input,select,button,textarea{font-family:var(--font)}
 .app{display:flex;flex-direction:column;min-height:100vh}
 /* ── DESKTOP LAYOUT ── */
 @media(min-width:768px){
-  html,body{overflow:visible;min-height:100%}
+  html,body{overflow-x:hidden;overflow-y:auto}
   body{background:var(--bg2)}
-  /* App vira flex-row: topbar (sidebar) + tela ativa lado a lado */
+  /* CSS GRID: coluna 240px (sidebar) + 1fr (conteúdo) */
   .app{
-    display:flex;flex-direction:row;min-height:100vh;
-    background:var(--bg);width:100%;max-width:100%;
+    display:grid;
+    grid-template-columns:240px 1fr;
+    grid-template-rows:auto;
+    min-height:100vh;
+    width:100%;
   }
-  /* Topbar = sidebar esquerda fixa */
+  /* Login ocupa as 2 colunas */
+  #screen-login{
+    grid-column:1 / -1;
+    grid-row:1;
+    display:none;
+  }
+  #screen-login.active{display:block}
+  /* Topbar = coluna 1, sticky */
   .topbar{
-    flex:0 0 240px;width:240px;min-height:100vh;
+    grid-column:1;
+    grid-row:1;
+    position:sticky;top:0;
+    width:240px;height:100vh;overflow-y:auto;
     flex-direction:column;align-items:flex-start;
     justify-content:flex-start;gap:0;padding:24px 16px;
-    position:sticky;top:0;height:100vh;overflow-y:auto;
     border-right:0.5px solid var(--border);border-bottom:none;
     background:var(--bg);box-shadow:2px 0 12px rgba(139,47,201,0.07);
-    z-index:10;
+    z-index:50;
   }
   .topbar > div:first-child{flex:1}
   .logout-btn{margin-top:auto;width:100%}
-  /* Nav lateral: posicionada dentro do fluxo do flex — usa a coluna do topbar */
+  /* Nav de abas: fixed na coluna esquerda, abaixo do topbar */
   .bottom-nav{
-    position:fixed;top:110px;left:0;z-index:10;
-    width:240px;border-top:none;border-right:0.5px solid var(--border);
+    position:fixed;left:0;top:100px;
+    width:240px;height:calc(100vh - 100px);
+    border-top:none;border-right:0.5px solid var(--border);
     flex-direction:column;padding:8px 12px;gap:4px;background:var(--bg);
-    height:calc(100vh - 110px);
+    z-index:40;
   }
   .bottom-nav.visible{display:flex}
   .nav-btn{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:10px;
     padding:10px 14px;font-size:13px;text-transform:none;letter-spacing:0;border-radius:8px}
   .nav-btn i{font-size:20px}
-  /* Telas ocupam o espaço restante após o sidebar */
+  /* Telas = coluna 2 */
   .screen{display:none}
-  .screen.active{display:flex;flex:1;min-width:0;flex-direction:column}
-  .screen > .main{flex:1;padding:32px 40px 40px;min-width:0;overflow-x:hidden}
+  .screen.active{display:block;grid-column:2;grid-row:1;min-width:0}
+  .screen > .main{padding:32px 40px 40px}
   .stat-grid{grid-template-columns:repeat(4,1fr)}
   .card{margin-bottom:18px}
   .agenda-wrap{overflow-x:visible}
   .field-row{grid-template-columns:repeat(3,1fr)}
-  /* Login: cobre tudo, por cima do layout */
-  #screen-login{
-    position:fixed;inset:0;z-index:1000;
-    display:none;flex-direction:column;
-  }
-  #screen-login.active{display:flex}
-  .login-bg{min-height:100vh;width:100%;padding:0;justify-content:center;align-items:center;flex-direction:column}
+  /* Login visual */
   .login-bg-logo{width:min(680px,55vw);opacity:0.13}
   .login-box{max-width:460px;padding:36px}
   .login-box h3{font-size:16px;margin-bottom:20px}
