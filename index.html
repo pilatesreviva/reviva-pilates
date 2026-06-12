@@ -38,38 +38,40 @@ input,select,button,textarea{font-family:var(--font)}
 /* ── DESKTOP LAYOUT ── */
 @media(min-width:768px){
   body{background:var(--bg2)}
-  .app{display:block;max-width:1600px;margin:0 auto;min-height:100vh;background:var(--bg)}
-  /* Topbar vira sidebar esquerda */
+  /* Sidebar fixa na esquerda */
   .topbar{
-    width:240px;min-height:100vh;flex-direction:column;align-items:flex-start;
-    justify-content:flex-start;gap:0;padding:24px 16px;position:fixed;top:0;left:0;
+    width:240px;height:100vh;flex-direction:column;align-items:flex-start;
+    justify-content:flex-start;gap:0;padding:24px 16px;
+    position:fixed;top:0;left:0;z-index:200;
     border-right:0.5px solid var(--border);border-bottom:none;
     backdrop-filter:none;background:var(--bg);box-shadow:2px 0 12px rgba(139,47,201,0.07);
   }
-  .topbar > div:first-child{margin-bottom:auto}
-  .logout-btn{margin-top:auto}
-  /* Bottom nav vira sidebar nav */
+  .topbar > div:first-child{flex:1}
+  .logout-btn{margin-top:auto;width:100%}
+  /* Nav lateral abaixo do logo */
   .bottom-nav{
-    position:fixed;top:110px;left:0;
+    position:fixed;top:110px;left:0;z-index:200;
     width:240px;border-top:none;border-right:0.5px solid var(--border);
-    flex-direction:column;padding:8px 12px;gap:4px;background:var(--bg);height:calc(100vh - 110px);
+    flex-direction:column;padding:8px 12px;gap:4px;background:var(--bg);
+    height:calc(100vh - 110px);
   }
   .bottom-nav.visible{display:flex}
   .nav-btn{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:10px;
-    padding:10px 14px;font-size:12px;text-transform:none;letter-spacing:0}
+    padding:10px 14px;font-size:13px;text-transform:none;letter-spacing:0;border-radius:8px}
   .nav-btn i{font-size:20px}
-  /* Conteúdo principal empurrado para direita da sidebar */
-  .screen.active > .main,
-  .screen > .main{margin-left:240px;padding:28px 40px 40px;min-height:100vh}
-  .screen.active > .main{display:block}
+  /* App empurrado para direita da sidebar */
+  .app{display:block;margin-left:240px;min-height:100vh;background:var(--bg)}
+  /* Telas e conteúdo sem margem extra */
+  .screen{display:none;width:100%}
+  .screen.active{display:block;width:100%;animation:fadeIn .2s ease}
+  .screen > .main{padding:32px 40px 40px;min-height:100vh}
   .stat-grid{grid-template-columns:repeat(4,1fr)}
   .card{margin-bottom:18px}
   .agenda-wrap{overflow-x:visible}
   .field-row{grid-template-columns:repeat(3,1fr)}
-  /* Telas ocupam toda a largura disponível no flex-row */
-  .screen{flex:1;width:100%;min-width:0}
-  /* Login centralizado no desktop */
-  #screen-login{width:100vw;position:fixed;inset:0;z-index:200;flex:none}
+  /* Login cobre a tela toda (por cima da sidebar) */
+  #screen-login{position:fixed;inset:0;z-index:300;display:none}
+  #screen-login.active{display:block}
   .login-bg{position:fixed;inset:0;height:100vh;width:100vw;padding:0}
   .login-bg-logo{width:min(680px,55vw);opacity:0.13}
   .login-box{max-width:460px;padding:36px}
