@@ -66,8 +66,10 @@ input,select,button,textarea{font-family:var(--font)}
   .card{margin-bottom:18px}
   .agenda-wrap{overflow-x:visible}
   .field-row{grid-template-columns:repeat(3,1fr)}
+  /* Telas ocupam toda a largura disponível no flex-row */
+  .screen{flex:1;width:100%;min-width:0}
   /* Login centralizado no desktop */
-  #screen-login{width:100vw;position:fixed;inset:0;z-index:200}
+  #screen-login{width:100vw;position:fixed;inset:0;z-index:200;flex:none}
   .login-bg{position:fixed;inset:0;height:100vh;width:100vw;padding:0}
   .login-bg-logo{width:min(680px,55vw);opacity:0.13}
   .login-box{max-width:460px;padding:36px}
