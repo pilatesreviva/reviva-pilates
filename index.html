@@ -35,49 +35,6 @@ html{height:100%;background:var(--bg2)}
 body{font-family:var(--font);color:var(--text);background:var(--bg);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.5}
 input,select,button,textarea{font-family:var(--font)}
 .app{display:flex;flex-direction:column;min-height:100vh}
-/* ── DESKTOP LAYOUT ── */
-@media(min-width:768px){
-  body{background:var(--bg2)}
-  /* App ocupa tudo mas com padding-left de 240px para a sidebar */
-  .app{display:block;padding-left:240px;min-height:100vh;background:var(--bg)}
-  /* Login: sem padding (cobre tudo) */
-  #screen-login.active{margin-left:-240px;width:100vw}
-  /* Topbar = sidebar fixa na esquerda */
-  .topbar{
-    position:fixed;left:0;top:0;
-    width:240px;height:100vh;overflow-y:auto;
-    flex-direction:column;align-items:flex-start;
-    justify-content:flex-start;gap:0;padding:24px 16px;
-    border-right:0.5px solid var(--border);border-bottom:none;
-    background:var(--bg);box-shadow:2px 0 12px rgba(139,47,201,0.07);
-    z-index:100;
-  }
-  .topbar > div:first-child{flex:1}
-  .logout-btn{margin-top:auto;width:100%}
-  /* Nav de abas: fixa debaixo do topbar */
-  .bottom-nav{
-    position:fixed;left:0;top:100px;
-    width:240px;height:calc(100vh - 100px);
-    border-top:none;border-right:0.5px solid var(--border);
-    flex-direction:column;padding:8px 12px;gap:4px;background:var(--bg);
-    z-index:90;
-  }
-  .bottom-nav.visible{display:flex}
-  .nav-btn{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:10px;
-    padding:10px 14px;font-size:13px;text-transform:none;letter-spacing:0;border-radius:8px}
-  .nav-btn i{font-size:20px}
-  /* Telas de conteúdo */
-  .screen > .main{padding:32px 40px 40px}
-  .stat-grid{grid-template-columns:repeat(4,1fr)}
-  .card{margin-bottom:18px}
-  .agenda-wrap{overflow-x:visible}
-  .field-row{grid-template-columns:repeat(3,1fr)}
-  /* Login visual */
-  .login-bg-logo{width:min(680px,55vw);opacity:0.13}
-  .login-box{max-width:460px;padding:36px}
-  .login-box h3{font-size:16px;margin-bottom:20px}
-  #screen-login img:not(.login-bg-logo){height:110px;margin-bottom:32px}
-}
 .topbar{padding:calc(var(--safe-top)+12px) 16px 12px;background:var(--bg);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
 .logo{font-family:var(--font-display);font-size:18px;font-weight:500}.logo span{color:var(--accent)}
 .user-tag{font-size:10px;color:var(--text3)}
@@ -196,6 +153,43 @@ input,select,button,textarea{font-family:var(--font)}
 .modal-box{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(45,27,78,0.20)}
 .modal-box h3{font-size:15px;font-weight:600;margin-bottom:16px;color:var(--text);display:flex;align-items:center;gap:8px}
 .modal-footer{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+/* ── DESKTOP LAYOUT (deve vir DEPOIS do CSS base para sobrescrever) ── */
+@media(min-width:768px){
+  body{background:var(--bg2)}
+  .app{display:block;padding-left:240px;min-height:100vh;background:var(--bg)}
+  #screen-login.active{margin-left:-240px;width:100vw}
+  .topbar{
+    position:fixed;left:0;top:0;
+    width:240px;height:100vh;overflow-y:auto;
+    flex-direction:column;align-items:flex-start;
+    justify-content:flex-start;gap:0;padding:24px 16px;
+    border-right:0.5px solid var(--border);border-bottom:none;
+    background:var(--bg);box-shadow:2px 0 12px rgba(139,47,201,0.07);
+    z-index:200;
+  }
+  .topbar > div:first-child{flex:1}
+  .logout-btn{margin-top:auto;width:100%}
+  .bottom-nav{
+    position:fixed;left:0;top:100px;bottom:0;right:auto;
+    width:240px;height:calc(100vh - 100px);
+    border-top:none;border-right:0.5px solid var(--border);
+    flex-direction:column;padding:8px 12px;gap:4px;background:var(--bg);
+    z-index:190;
+  }
+  .bottom-nav.visible{display:flex}
+  .nav-btn{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:10px;
+    padding:10px 14px;font-size:13px;text-transform:none;letter-spacing:0;border-radius:8px}
+  .nav-btn i{font-size:20px}
+  .main{padding:32px 40px 40px;overflow-y:visible}
+  .stat-grid{grid-template-columns:repeat(4,1fr)}
+  .card{margin-bottom:18px}
+  .agenda-wrap{overflow-x:visible}
+  .field-row{grid-template-columns:repeat(3,1fr)}
+  .login-bg-logo{width:min(680px,55vw);opacity:0.13}
+  .login-box{max-width:460px;padding:36px}
+  .login-box h3{font-size:16px;margin-bottom:20px}
+  #screen-login img:not(.login-bg-logo){height:110px;margin-bottom:32px}
+}
 </style>
 </head>
 <body>
