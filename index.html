@@ -37,24 +37,28 @@ input,select,button,textarea{font-family:var(--font)}
 .app{display:flex;flex-direction:column;min-height:100vh}
 /* ── DESKTOP LAYOUT ── */
 @media(min-width:768px){
-  /* Garantir que fixed use o viewport, nao o body como referencia */
-  html{overflow:visible}
-  body{overflow:visible;background:var(--bg);display:flex;align-items:flex-start;min-height:100vh}
-  /* Sidebar: sticky em vez de fixed para evitar problemas de containing block */
+  html,body{overflow:visible;min-height:100%}
+  body{background:var(--bg2)}
+  /* App vira flex-row: topbar (sidebar) + tela ativa lado a lado */
+  .app{
+    display:flex;flex-direction:row;min-height:100vh;
+    background:var(--bg);width:100%;max-width:100%;
+  }
+  /* Topbar = sidebar esquerda fixa */
   .topbar{
-    flex-shrink:0;width:240px;min-height:100vh;
+    flex:0 0 240px;width:240px;min-height:100vh;
     flex-direction:column;align-items:flex-start;
     justify-content:flex-start;gap:0;padding:24px 16px;
-    position:sticky;top:0;align-self:flex-start;
+    position:sticky;top:0;height:100vh;overflow-y:auto;
     border-right:0.5px solid var(--border);border-bottom:none;
     background:var(--bg);box-shadow:2px 0 12px rgba(139,47,201,0.07);
-    z-index:100;
+    z-index:10;
   }
   .topbar > div:first-child{flex:1}
   .logout-btn{margin-top:auto;width:100%}
-  /* Nav lateral: fixed agora funciona pois html/body tem overflow:visible */
+  /* Nav lateral: posicionada dentro do fluxo do flex — usa a coluna do topbar */
   .bottom-nav{
-    position:fixed;top:110px;left:0;z-index:100;
+    position:fixed;top:110px;left:0;z-index:10;
     width:240px;border-top:none;border-right:0.5px solid var(--border);
     flex-direction:column;padding:8px 12px;gap:4px;background:var(--bg);
     height:calc(100vh - 110px);
@@ -63,16 +67,21 @@ input,select,button,textarea{font-family:var(--font)}
   .nav-btn{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:10px;
     padding:10px 14px;font-size:13px;text-transform:none;letter-spacing:0;border-radius:8px}
   .nav-btn i{font-size:20px}
-  /* App cresce para preencher o restante */
-  .app{flex:1;min-width:0;min-height:100vh;background:var(--bg);display:block}
-  .screen > .main{padding:32px 40px 40px}
+  /* Telas ocupam o espaço restante após o sidebar */
+  .screen{display:none}
+  .screen.active{display:flex;flex:1;min-width:0;flex-direction:column}
+  .screen > .main{flex:1;padding:32px 40px 40px;min-width:0;overflow-x:hidden}
   .stat-grid{grid-template-columns:repeat(4,1fr)}
   .card{margin-bottom:18px}
   .agenda-wrap{overflow-x:visible}
   .field-row{grid-template-columns:repeat(3,1fr)}
-  /* Login cobre tudo */
-  #screen-login{position:fixed;inset:0;z-index:1000}
-  .login-bg{position:fixed;inset:0;height:100vh;width:100vw;padding:0}
+  /* Login: cobre tudo, por cima do layout */
+  #screen-login{
+    position:fixed;inset:0;z-index:1000;
+    display:none;flex-direction:column;
+  }
+  #screen-login.active{display:flex}
+  .login-bg{min-height:100vh;width:100%;padding:0;justify-content:center;align-items:center;flex-direction:column}
   .login-bg-logo{width:min(680px,55vw);opacity:0.13}
   .login-box{max-width:460px;padding:36px}
   .login-box h3{font-size:16px;margin-bottom:20px}
