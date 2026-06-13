@@ -792,11 +792,13 @@ function mostrarLinkCli(cli){
   document.getElementById('link-cli-box').textContent=NETLIFY+'/?c='+cli.codigo;
 }
 
+const _cliCache={};
 async function renderTabelaClientes(){
   loading(true,'Carregando...');
   try{
     const busca=(document.getElementById('busca-cli')?.value||'').toLowerCase();
     const rows=await sbGet('clientes','order=nome.asc');
+    (rows||[]).forEach(c=>{_cliCache[c.id]=c;});
     const f=(rows||[]).filter(c=>!busca||c.nome.toLowerCase().includes(busca)||c.codigo.toLowerCase().includes(busca));
     document.getElementById('total-cli').textContent='('+f.length+')';
     document.getElementById('tbody-cli').innerHTML=f.length===0
@@ -814,8 +816,8 @@ async function renderTabelaClientes(){
         <td><span class="badge ${PAG_CLS[c.pagamento]||'pix'}">${PAG_LABEL[c.pagamento]||'PIX'}</span></td>
         <td><span class="${c.ativo?'badge ativo':'badge inativo'}" onclick="toggleCli('${c.id}',${!c.ativo})">${c.ativo?'Ativo':'Inativo'}</span></td>
         <td style="display:flex;gap:4px">
-          <button class="btn sm" onclick='editarCliente(${JSON.stringify(c)})'><i class="ti ti-pencil"></i></button>
-          <button class="btn sm" onclick='mostrarLinkCli(${JSON.stringify(c)})'><i class="ti ti-link"></i></button>
+          <button class="btn sm" onclick="editarCliente('${c.id}')"><i class="ti ti-pencil"></i></button>
+          <button class="btn sm" onclick="mostrarLinkCliId('${c.id}')"><i class="ti ti-link"></i></button>
           <button class="btn sm danger" onclick="excluirCli('${c.id}')"><i class="ti ti-trash"></i></button>
         </td>
       </tr>`).join('');
@@ -891,7 +893,8 @@ async function renderTabelaColabs(){
 async function toggleCol(id,ativo){await sbPatch('colaboradoras','id=eq.'+id,{ativo});renderTabelaColabs();}
 async function excluirCol(id){if(!confirm('Remover colaboradora?'))return;await sbDelete('colaboradoras','id=eq.'+id);renderTabelaColabs();}
 
-function editarCliente(c){
+function editarCliente(id){
+  const c=_cliCache[id];if(!c)return;
   document.getElementById('edit-cli-id').value=c.id;
   document.getElementById('edit-cli-nome').value=c.nome||'';
   document.getElementById('edit-cli-cpf').value=c.cpf||'';
@@ -903,6 +906,7 @@ function editarCliente(c){
   document.getElementById('msg-edit-cli').textContent='';
   document.getElementById('modal-edit-cli').classList.add('open');
 }
+function mostrarLinkCliId(id){const c=_cliCache[id];if(c)mostrarLinkCli(c);}
 function fecharModalEditCli(){document.getElementById('modal-edit-cli').classList.remove('open');}
 
 async function salvarEdicaoCli(){
