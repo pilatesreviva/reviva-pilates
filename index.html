@@ -1276,7 +1276,7 @@ function renderMeusAgendamentos(){
   }).join('');
 }
 
-function navSemana(d,s){wkOff[s]+=d;if(s==='cli')renderGridCliente();if(s==='col')renderPresencas();if(s==='avail')renderAvailGrid();if(s==='exp')initExpGrid();}
+function navSemana(d,s){wkOff[s]+=d;if(s==='cli')renderGridCliente();if(s==='col')initPresencas();if(s==='avail'){initVagas();}if(s==='exp')initExpGrid();}
 
 async function initPresencas(){
   loading(true,'Carregando presenças...');
