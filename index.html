@@ -499,6 +499,7 @@ input,select,button,textarea{font-family:var(--font)}
       <div class="cred-sub" id="cred-sub">Cada agendamento consome 1 crédito</div>
     </div>
   </div>
+  <div id="cred-venc-alert" style="display:none"></div>
 
   <div class="tab-row">
     <button class="tab-btn active" id="tab-freq-btn" onclick="switchAgendaTab('freq')"><i class="ti ti-repeat" style="font-size:13px"></i> Frequência</button>
@@ -673,15 +674,46 @@ function h4t(t){return t==='manha'?HORAS_MANHA:t==='tarde'?HORAS_TARDE:ALL_HORAS
 function loading(show,txt='Aguarde...'){document.getElementById('loading').style.display=show?'flex':'none';document.getElementById('loading-text').textContent=txt;}
 function showMsg(id,txt,type){const el=document.getElementById(id);if(el)el.innerHTML=txt?`<div class="alert ${type}">${txt}</div>`:'';}
 function creditos(){return currentUser?currentUser.creditos:0;}
-function creditosLivres(){return Math.max(0,creditos());}
+function creditosVencidos(){
+  if(!currentUser||!currentUser.credito_validade) return false;
+  return new Date(currentUser.credito_validade+'T23:59:59')<new Date();
+}
+function creditosLivres(){return creditosVencidos()?0:Math.max(0,creditos());}
 function creditosUsados(){return mySchedule.filter(s=>new Date(s.date+'T'+String(s.hour).padStart(2,'0')+':00')>new Date()).length;}
+function diasParaVencer(){
+  if(!currentUser||!currentUser.credito_validade) return null;
+  const diff=new Date(currentUser.credito_validade+'T23:59:59')-new Date();
+  return Math.ceil(diff/(1000*3600*24));
+}
 function atualizarCredBar(){
   const livre=creditosLivres();
   const usado=creditosUsados();
+  const dias=diasParaVencer();
+  const vencido=creditosVencidos();
   document.getElementById('cred-num').textContent=creditos();
-  document.getElementById('cred-sub').textContent=usado+' agendado(s) · '+livre+' crédito(s) disponível(is)';
-  document.getElementById('cred-num').style.color=livre===0?'var(--red)':livre<=2?'var(--yellow)':'var(--accent)';
+  let sub=usado+' agendado(s) · '+livre+' crédito(s) disponível(is)';
+  if(currentUser&&currentUser.credito_validade){
+    if(vencido) sub+=' · <span style="color:var(--red);font-weight:600">Créditos VENCIDOS em '+fmtData(currentUser.credito_validade)+'</span>';
+    else if(dias<=7) sub+=' · <span style="color:var(--yellow)">Vencem em '+dias+' dia(s)</span>';
+    else sub+=' · Vencem em '+fmtData(currentUser.credito_validade);
+  }
+  document.getElementById('cred-num').style.color=vencido?'var(--red)':livre===0?'var(--red)':livre<=2?'var(--yellow)':'var(--accent)';
+  document.getElementById('cred-sub').innerHTML=sub;
+  const alertEl=document.getElementById('cred-venc-alert');
+  if(alertEl){
+    if(vencido){
+      alertEl.style.display='block';
+      alertEl.innerHTML=`<div class="alert err"><strong>Seus créditos venceram em ${fmtData(currentUser.credito_validade)}.</strong> Entre em contato com o estúdio para renovar.</div>`;
+    } else if(dias!==null&&dias<=7){
+      alertEl.style.display='block';
+      alertEl.innerHTML=`<div class="alert warn">Atenção: seus créditos vencem em <strong>${dias} dia(s)</strong> (${fmtData(currentUser.credito_validade)}). Renove em breve!</div>`;
+    } else {
+      alertEl.style.display='none';
+      alertEl.innerHTML='';
+    }
+  }
 }
+function fmtData(s){if(!s)return'';const p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 
 async function gerarCodigoCli(){const rows=await sbGet('clientes','select=codigo&order=created_at.desc&limit=1');if(rows&&rows.length>0){const n=parseInt(rows[0].codigo.replace('CLI-',''))+1;return 'CLI-'+String(n).padStart(3,'0');}return 'CLI-001';}
 async function gerarCodigoCol(){const rows=await sbGet('colaboradoras','select=codigo&order=created_at.desc&limit=1');if(rows&&rows.length>0){const n=parseInt(rows[0].codigo.replace('COL-',''))+1;return 'COL-'+String(n).padStart(3,'0');}return 'COL-001';}
@@ -725,7 +757,12 @@ async function fazerLogin(){
       const cli=rows.find(r=>fmtNasc(r.nascimento)===fmtNasc(nasc));
       if(!cli){showMsg('login-msg','Data de nascimento incorreta.','err');return;}
       currentUser={tipo:'cliente',...cli};
-      document.getElementById('user-label').textContent=cli.nome+' — '+cli.creditos+' créditos';
+      const venc=creditosVencidos();
+      const dias=diasParaVencer();
+      let labelExtra=cli.creditos+' créditos';
+      if(venc) labelExtra+=' (VENCIDOS)';
+      else if(dias!==null&&dias<=7) labelExtra+=` (vencem em ${dias}d)`;
+      document.getElementById('user-label').textContent=cli.nome+' — '+labelExtra;
       showNav(['nav-agenda','nav-vagas']);
       await initClienteView();
     }
@@ -838,11 +875,12 @@ async function renderTabelaClientes(){
         <td><span class="code-tag">${c.codigo}</span></td>
         <td style="font-weight:500">${c.nome}</td>
         <td>
-          <div style="display:flex;align-items:center;gap:4px">
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
             <span style="font-weight:500;color:var(--accent);min-width:20px;text-align:center">${c.creditos}</span>
             <button class="btn sm success" onclick="adicionarCreditos('${c.id}','${c.nome}',${c.creditos})" title="Adicionar créditos"><i class="ti ti-plus"></i></button>
             <button class="btn sm danger" onclick="reduzirCreditos('${c.id}','${c.nome}',${c.creditos})" title="Reduzir créditos"><i class="ti ti-minus"></i></button>
           </div>
+          ${c.credito_validade?`<div style="font-size:9px;margin-top:2px;color:${new Date(c.credito_validade+'T23:59:59')<new Date()?'var(--red)':'var(--text3)'}">${new Date(c.credito_validade+'T23:59:59')<new Date()?'⚠ Vencido':'Vence'} ${fmtData(c.credito_validade)}</div>`:'<div style="font-size:9px;color:var(--text3);margin-top:2px">Sem vencimento</div>'}
         </td>
         <td><span class="badge ${PAG_CLS[c.pagamento]||'pix'}">${PAG_LABEL[c.pagamento]||'PIX'}</span></td>
         <td><span class="${c.ativo?'badge ativo':'badge inativo'}" onclick="toggleCli('${c.id}',${!c.ativo})">${c.ativo?'Ativo':'Inativo'}</span></td>
@@ -856,10 +894,13 @@ async function renderTabelaClientes(){
 }
 
 async function adicionarCreditos(id,nome,atual){
-  const novo=atual+1;
+  const qtd=parseInt(prompt(`Quantos créditos adicionar para ${nome}?`,'1'));
+  if(!qtd||qtd<=0) return;
+  const novo=atual+qtd;
+  const validade=toKey(new Date(Date.now()+30*24*3600*1000));
   loading(true,'Atualizando...');
   try{
-    await sbPatch('clientes','id=eq.'+id,{creditos:novo});
+    await sbPatch('clientes','id=eq.'+id,{creditos:novo,credito_validade:validade});
     renderTabelaClientes();
   } finally{loading(false);}
 }
@@ -1076,6 +1117,7 @@ async function salvarFrequencia(){
       if(sl.count<MAX) novosSlots.push({date:dk,hour:hora});
     });
   }
+  if(creditosVencidos()){showMsg('freq-msg','Seus créditos venceram em '+fmtData(currentUser.credito_validade)+'. Entre em contato com o estúdio para renovar.','err');return;}
   if(novosSlots.length>creditos()){
     showMsg('freq-msg',`Créditos insuficientes. Você tem ${creditos()} créditos mas esta frequência requer ${novosSlots.length} agendamentos.`,'err');return;
   }
@@ -1102,6 +1144,7 @@ async function salvarFrequencia(){
 
 async function bookSlot(dk,h){
   if(isBlocked4h(dk,h)){showMsg('alter-msg','Bloqueado: menos de 4h de antecedência.','err');return;}
+  if(creditosVencidos()){showMsg('alter-msg','Seus créditos venceram em '+fmtData(currentUser.credito_validade)+'. Entre em contato com o estúdio para renovar.','err');return;}
   if(creditosLivres()<=0){showMsg('alter-msg','Você não tem créditos disponíveis para agendar.','err');return;}
   const sl=getSlot(dk,h);
   if(sl.count>=MAX){showMsg('alter-msg','Horário lotado.','err');return;}
