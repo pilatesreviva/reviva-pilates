@@ -1295,23 +1295,28 @@ function renderPresencas(){
       }
     });
   }
+  const isAdmin=currentUser.tipo==='admin';
+  const horasPermitidas=new Set(horasVisiveis);
   let totalP=0,totalF=0,totalFJ=0;
   let mP={manha:0,tarde:0},mF={manha:0,tarde:0},mFJ={manha:0,tarde:0};
   Object.entries(presencasMap).forEach(([k,v])=>{
     if(!k.includes('_aluno_')) return;
     const parts=k.split('_');const hora=parseInt(parts[1]);
+    if(!horasPermitidas.has(hora)) return;
     const turno=HORAS_MANHA.includes(hora)?'manha':'tarde';
     if(v==='P'){totalP++;mP[turno]++;}else if(v==='F'){totalF++;mF[turno]++;}else if(v==='FJ'){totalFJ++;mFJ[turno]++;}
   });
   const tot=totalP+totalF+totalFJ||1;
   const totM=mP.manha+mF.manha+mFJ.manha||1;const totT=mP.tarde+mF.tarde+mFJ.tarde||1;
-  document.getElementById('stat-grid').innerHTML=`
+  let statHtml=`
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">${totalP}</div><div class="stat-lbl">Presenças</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--red)">${totalF}</div><div class="stat-lbl">Faltas</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--yellow)">${totalFJ}</div><div class="stat-lbl">Faltas just.</div></div>
-    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">% Presença</div></div>
+    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">% Presença</div></div>`;
+  if(isAdmin) statHtml+=`
     <div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:14px">${Math.round(mP.manha/totM*100)}%</div><div class="stat-lbl"><span class="badge manha" style="font-size:8px">TH</span> Thayane</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:14px">${Math.round(mP.tarde/totT*100)}%</div><div class="stat-lbl"><span class="badge tarde" style="font-size:8px">RE</span> Rebeka</div></div>`;
+  document.getElementById('stat-grid').innerHTML=statHtml;
   const tbody=document.getElementById('tbody-presencas');
   if(rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--text3);padding:16px;text-align:center">Nenhuma sessão esta semana.</td></tr>';return;}
   tbody.innerHTML=rows.map(r=>{
@@ -1347,6 +1352,7 @@ async function salvarPresencas(){
       return{data_slot,hora,tipo,codigo,status};
     }).filter(r=>r.status);
     if(upserts.length>0) await sbUpsert('presencas',upserts);
+    renderPresencas();
     document.getElementById('msg-presenca').textContent='Salvo!';
     setTimeout(()=>document.getElementById('msg-presenca').textContent='',2500);
   } finally{loading(false);}
