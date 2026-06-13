@@ -262,6 +262,7 @@ input,select,button,textarea{font-family:var(--font)}
     <button class="tab-btn active" id="tab-cli-btn" onclick="switchTab('cli')">Clientes</button>
     <button class="tab-btn" id="tab-col-btn" onclick="switchTab('col')">Colaboradoras</button>
     <button class="tab-btn" id="tab-exp-btn" onclick="switchTab('exp')">Experimentais</button>
+    <button class="tab-btn" id="tab-agenda-btn" onclick="switchTab('agenda')" style="display:none">Agenda</button>
     <button class="tab-btn" id="tab-rel-btn" onclick="switchTab('rel')">Relatórios</button>
   </div>
   <div id="tab-cli">
@@ -311,16 +312,6 @@ input,select,button,textarea{font-family:var(--font)}
       <div style="overflow-x:auto"><table class="data-table"><thead><tr>
         <th>Código</th><th>Nome</th><th>Créditos</th><th>Pgto.</th><th>Freq.</th><th>Status</th><th></th>
       </tr></thead><tbody id="tbody-cli"></tbody></table></div>
-    </div>
-    <!-- Consulta de horários — apenas admin -->
-    <div class="card" id="admin-agenda-card" style="display:none">
-      <div class="card-title"><i class="ti ti-calendar-search" style="color:var(--accent)"></i> Agenda por horário</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Selecione uma data para ver todos os clientes agendados por horário.</div>
-      <div class="field-row" style="align-items:flex-end;gap:8px">
-        <div class="field" style="margin-bottom:0"><label>Data</label><input type="date" id="admin-agenda-data" onchange="verAgendaDia()"></div>
-        <button class="btn primary" onclick="verAgendaDia()" style="margin-bottom:0"><i class="ti ti-search"></i> Ver</button>
-      </div>
-      <div id="admin-agenda-resultado" style="margin-top:12px"></div>
     </div>
   </div>
   <div id="tab-col" style="display:none">
@@ -417,6 +408,23 @@ input,select,button,textarea{font-family:var(--font)}
       <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Percentual de presença dos alunos de cada instrutora na semana atual.</div>
       <button class="btn primary" onclick="gerarRelatorioSemanal()"><i class="ti ti-refresh"></i> Calcular semana atual</button>
       <div id="rel-col-resultado" style="margin-top:14px"></div>
+    </div>
+  </div>
+  <!-- ABA AGENDA (apenas admin) -->
+  <div id="tab-agenda" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-calendar-week" style="color:var(--accent)"></i> Agenda semanal</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Passe o cursor sobre um horário para ver os clientes agendados.</div>
+      <div class="week-nav">
+        <button class="btn sm" onclick="navSemanaAgenda(-1)"><i class="ti ti-arrow-left"></i></button>
+        <span id="week-agenda-admin"></span>
+        <button class="btn sm" onclick="navSemanaAgenda(1)"><i class="ti ti-arrow-right"></i></button>
+      </div>
+      <div class="legend" style="margin-top:8px">
+        <div class="leg"><span class="badge manha" style="font-size:9px">TH</span>Thayane</div>
+        <div class="leg"><span class="badge tarde" style="font-size:9px">RE</span>Rebeka</div>
+      </div>
+      <div class="agenda-wrap" style="margin-top:8px"><div id="grid-agenda-admin"></div></div>
     </div>
   </div>
 </div>
@@ -794,7 +802,7 @@ async function fazerLogin(){
       currentUser={tipo:'admin',nome:'Reviva'};
       document.getElementById('user-label').textContent='Reviva — administradora';
       showNav(['nav-cadastros','nav-presencas','nav-vagas']);
-      document.getElementById('admin-agenda-card').style.display='block';
+      document.getElementById('tab-agenda-btn').style.display='';
       abrirApp('cadastros');
     } else if(tipo==='colaborador'){
       const cpf5=document.getElementById('colab-cpf5').value.trim();
@@ -870,18 +878,54 @@ function setMode(m){
 }
 
 function switchTab(tab){
-  ['cli','col','exp','rel'].forEach(t=>{
+  ['cli','col','exp','agenda','rel'].forEach(t=>{
     const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
     const btn=document.getElementById('tab-'+t+'-btn');if(btn)btn.classList.toggle('active',t===tab);
   });
-  if(tab==='exp'){
-    initExpGrid();
-    renderTabelaExperimentais();
-  }
+  if(tab==='exp'){initExpGrid();renderTabelaExperimentais();}
+  if(tab==='agenda'){initAgendaAdmin();}
   if(tab==='rel'){
     const now=new Date();
     document.getElementById('rel-mes').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   }
+}
+
+let wkAgendaAdmin=0;
+function navSemanaAgenda(d){wkAgendaAdmin+=d;initAgendaAdmin();}
+
+async function initAgendaAdmin(){
+  const ws=getWeekMon(wkAgendaAdmin);
+  const we=new Date(ws);we.setDate(we.getDate()+6);
+  document.getElementById('week-agenda-admin').textContent=fmtWeek(ws);
+  document.getElementById('grid-agenda-admin').innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px">Carregando...</div>';
+  const rows=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&select=data_slot,hora,cliente_nome`);
+  const agSlots={};
+  (rows||[]).forEach(r=>{
+    const k=r.data_slot+'_'+r.hora;
+    if(!agSlots[k])agSlots[k]=[];
+    agSlots[k].push((r.cliente_nome||'?').split(' ')[0]);
+  });
+  const days=[];for(let i=0;i<5;i++){const d=new Date(ws);d.setDate(d.getDate()+i);days.push(d);}
+  let html='<div class="grid grid-5"><div class="gh"></div>';
+  days.forEach(d=>{const today=toKey(d)===toKey(new Date());html+=`<div class="gh${today?' today-col':''}">${DIAS[d.getDay()]}<br><span style="font-size:9px">${d.getDate()}/${d.getMonth()+1}</span></div>`;});
+  ALL_HORAS.forEach(h=>{
+    const isManha=HORAS_MANHA.includes(h);
+    const badge=`<span class="badge ${isManha?'manha':'tarde'}" style="font-size:8px;padding:1px 3px">${isManha?'TH':'RE'}</span>`;
+    html+=`<div class="tlabel">${badge}${String(h).padStart(2,'0')}h</div>`;
+    days.forEach(d=>{
+      const dk=toKey(d);
+      if(isHoliday(d)){html+=`<div class="slot holiday"><span style="font-size:8px;color:var(--yellow)">Fer</span></div>`;return;}
+      if(isWeekend(d)){html+=`<div class="slot" style="background:var(--bg2)"></div>`;return;}
+      const nomes=agSlots[dk+'_'+h]||[];
+      const cnt=nomes.length;const livre=MAX-cnt;
+      const cor=cnt>=MAX?'var(--red)':cnt>=3?'var(--yellow)':'var(--green)';
+      const cls=cnt>=MAX?'full':'free';
+      const tip=nomes.length>0?nomes.join('\n'):'';
+      html+=`<div class="slot ${cls}"${tip?` data-tip="${tip.replace(/"/g,'&quot;')}"`:''}><span class="slot-count" style="color:${cor}">${cnt>0?cnt+'/'+MAX:livre+'v'}</span></div>`;
+    });
+  });
+  html+='</div>';
+  document.getElementById('grid-agenda-admin').innerHTML=html;
 }
 
 function switchAgendaTab(tab){
