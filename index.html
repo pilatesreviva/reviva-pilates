@@ -932,9 +932,7 @@ async function renderTabelaClientes(){
 }
 
 async function adicionarCreditos(id,nome,atual){
-  const qtd=parseInt(prompt(`Quantos créditos adicionar para ${nome}?`,'1'));
-  if(!qtd||qtd<=0) return;
-  const novo=atual+qtd;
+  const novo=atual+1;
   const validade=toKey(new Date(Date.now()+30*24*3600*1000));
   loading(true,'Atualizando...');
   try{
@@ -1455,12 +1453,27 @@ async function verificarVaga(){
   if(isWeekend(d)){res.innerHTML='<div class="alert warn">Sem atendimento no final de semana.</div>';return;}
   loading(true,'Verificando...');
   try{
-    const rows=await sbGet('agendamentos',`data_slot=eq.${dt}&hora=eq.${h}&select=id`);
+    const rows=await sbGet('agendamentos',`data_slot=eq.${dt}&hora=eq.${h}&select=cliente_nome,cliente_codigo&order=cliente_nome.asc`);
     const count=(rows||[]).length;const livre=MAX-count;
     const inst=HORAS_MANHA.includes(h)?'Thayane':'Rebeka';
-    res.innerHTML=livre<=0
+    const dtFmt=new Date(dt+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+    let html=livre<=0
       ?`<div class="alert err">Lotado — 0 vagas às ${String(h).padStart(2,'0')}h · ${inst}</div>`
       :`<div class="alert ok">${livre} de ${MAX} vagas às ${String(h).padStart(2,'0')}h · ${inst}</div>`;
+    if(count>0){
+      html+=`<div style="margin-top:10px;font-size:12px;font-weight:600;color:var(--text2)">Alunos agendados (${count}):</div>`;
+      html+=`<div style="margin-top:6px;display:flex;flex-direction:column;gap:6px">`;
+      (rows||[]).forEach(r=>{
+        html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--card2);border:0.5px solid var(--border);border-radius:var(--radius-sm)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-dim,rgba(99,102,241,0.15));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent)">${iniciais(r.cliente_nome||'?')}</div>
+          <div style="font-size:12px;font-weight:500">${r.cliente_nome||'—'}</div>
+        </div>`;
+      });
+      html+='</div>';
+    } else {
+      html+=`<div style="margin-top:8px;font-size:11px;color:var(--text3)">Nenhum aluno agendado neste horário.</div>`;
+    }
+    res.innerHTML=html;
   } finally{loading(false);}
 }
 
