@@ -773,8 +773,10 @@ async function cadastrarCliente(){
   const cpf=document.getElementById('c-cpf').value.trim();
   const nasc=document.getElementById('c-nasc').value;
   if(!nome||!cpf||!nasc){showMsg('msg-cad-cli','Nome, CPF e nascimento são obrigatórios.','err');return;}
-  loading(true,'Cadastrando cliente...');
+  loading(true,'Verificando CPF...');
   try{
+    const dup=await sbGet('clientes',`cpf=eq.${encodeURIComponent(cpf)}&select=id`);
+    if(dup&&dup.length>0){showMsg('msg-cad-cli','Este CPF já está cadastrado.','err');return;}
     const codigo=await gerarCodigoCli();
     const body={codigo,nome,cpf,nascimento:nasc,telefone:document.getElementById('c-tel').value.trim(),creditos:parseInt(document.getElementById('c-cred').value),pagamento:document.getElementById('c-pag').value,ativo:true};
     const res=await sbPost('clientes',body);
@@ -1259,10 +1261,10 @@ async function salvarPresencas(){
   try{
     const upserts=Object.entries(presencasMap).map(([k,status])=>{
       const parts=k.split('_');
-      const data_slot=parts.slice(0,3).join('-');
-      const hora=parseInt(parts[3]);
-      const tipo=parts[4];
-      const codigo=parts.slice(5).join('_');
+      const data_slot=parts[0];
+      const hora=parseInt(parts[1]);
+      const tipo=parts[2];
+      const codigo=parts.slice(3).join('_');
       return{data_slot,hora,tipo,codigo,status};
     }).filter(r=>r.status);
     if(upserts.length>0) await sbUpsert('presencas',upserts);
