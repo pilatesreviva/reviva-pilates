@@ -932,11 +932,9 @@ async function renderTabelaClientes(){
 }
 
 async function adicionarCreditos(id,nome,atual){
-  const novo=atual+1;
-  const validade=toKey(new Date(Date.now()+30*24*3600*1000));
   loading(true,'Atualizando...');
   try{
-    await sbPatch('clientes','id=eq.'+id,{creditos:novo,credito_validade:validade});
+    await sbPatch('clientes','id=eq.'+id,{creditos:atual+1});
     renderTabelaClientes();
   } finally{loading(false);}
 }
