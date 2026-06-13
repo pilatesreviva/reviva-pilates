@@ -432,6 +432,10 @@ input,select,button,textarea{font-family:var(--font)}
           <div class="field"><label>Créditos</label><input type="number" id="edit-cli-cred" min="0" style="width:100%"></div>
         </div>
         <div class="field-row">
+          <div class="field"><label>Vencimento dos créditos</label><input type="date" id="edit-cli-validade"></div>
+          <div class="field" style="display:flex;align-items:flex-end"><button class="btn sm" style="margin-bottom:0" onclick="document.getElementById('edit-cli-validade').value=new Date(Date.now()+30*24*3600*1000).toISOString().slice(0,10)" title="Definir +30 dias a partir de hoje"><i class="ti ti-refresh"></i> +30 dias</button></div>
+        </div>
+        <div class="field-row">
           <div class="field"><label>Frequência semanal</label>
             <select id="edit-cli-freq">
               <option value="">— não definida —</option>
@@ -593,6 +597,17 @@ input,select,button,textarea{font-family:var(--font)}
     <button class="btn sm" onclick="navSemana(-1,'col')"><i class="ti ti-arrow-left"></i></button>
     <span id="week-col"></span>
     <button class="btn sm" onclick="navSemana(1,'col')"><i class="ti ti-arrow-right"></i></button>
+  </div>
+  <!-- Grade de horários (visível para admin e colaboradoras) -->
+  <div class="card" id="presencas-grade-card" style="display:none">
+    <div class="card-title"><i class="ti ti-calendar-week"></i> Grade de horários da semana</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Clique em um horário para ver os clientes agendados.</div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--green-dim);border:0.5px solid rgba(74,222,128,0.3)"></div>Com vagas</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--red-dim)"></div>Lotado</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--yellow-dim)"></div>Feriado</div>
+    </div>
+    <div class="agenda-wrap"><div id="grid-presencas-agenda"></div></div>
   </div>
   <div class="card">
     <div class="card-title"><i class="ti ti-clipboard-list"></i> Registro de presença</div>
@@ -998,6 +1013,7 @@ function editarCliente(id){
   document.getElementById('edit-cli-pag').value=c.pagamento||'pix';
   document.getElementById('edit-cli-cred').value=c.creditos||0;
   document.getElementById('edit-cli-freq').value=c.frequencia||'';
+  document.getElementById('edit-cli-validade').value=c.credito_validade||'';
   document.getElementById('edit-cli-ativo').value=String(c.ativo!==false);
   document.getElementById('msg-edit-cli').textContent='';
   document.getElementById('modal-edit-cli').classList.add('open');
@@ -1017,6 +1033,7 @@ async function salvarEdicaoCli(){
     pagamento:document.getElementById('edit-cli-pag').value,
     creditos:parseInt(document.getElementById('edit-cli-cred').value)||0,
     frequencia:parseInt(document.getElementById('edit-cli-freq').value)||null,
+    credito_validade:document.getElementById('edit-cli-validade').value||null,
     ativo:document.getElementById('edit-cli-ativo').value==='true'
   };
   loading(true,'Salvando...');
@@ -1342,6 +1359,31 @@ function renderPresencas(){
     <div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:14px">${Math.round(mP.manha/totM*100)}%</div><div class="stat-lbl"><span class="badge manha" style="font-size:8px">TH</span> Thayane</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:14px">${Math.round(mP.tarde/totT*100)}%</div><div class="stat-lbl"><span class="badge tarde" style="font-size:8px">RE</span> Rebeka</div></div>`;
   document.getElementById('stat-grid').innerHTML=statHtml;
+  // Grade semanal clicável (admin e colaboradoras)
+  const gradeCard=document.getElementById('presencas-grade-card');
+  if(gradeCard){
+    gradeCard.style.display='block';
+    const ws2=getWeekMon(wkOff.col);
+    const days2=[];for(let i=0;i<5;i++){const d=new Date(ws2);d.setDate(d.getDate()+i);days2.push(d);}
+    let gh='<div class="grid grid-5"><div class="gh"></div>';
+    days2.forEach(d=>{const today=toKey(d)===toKey(new Date());gh+=`<div class="gh${today?' today-col':''}">${DIAS[d.getDay()]}<br><span style="font-size:9px">${d.getDate()}/${d.getMonth()+1}</span></div>`;});
+    horasVisiveis.forEach(h=>{
+      const isManha=HORAS_MANHA.includes(h);
+      const badge=`<span class="badge ${isManha?'manha':'tarde'}" style="font-size:8px;padding:1px 3px">${isManha?'T':'R'}</span>`;
+      gh+=`<div class="tlabel">${badge}${String(h).padStart(2,'0')}h</div>`;
+      days2.forEach(d=>{
+        const dk=toKey(d);
+        if(isHoliday(d)){gh+=`<div class="slot holiday"><span style="font-size:8px;color:var(--yellow)">Fer</span></div>`;return;}
+        if(isWeekend(d)){gh+=`<div class="slot"></div>`;return;}
+        const sl=getSlot(dk,h);
+        if(sl.count===0){gh+=`<div class="slot" style="cursor:default"><span class="slot-count" style="color:var(--text3)">—</span></div>`;return;}
+        const cor=sl.count>=MAX?'var(--red)':sl.count>=3?'var(--yellow)':'var(--green)';
+        gh+=`<div class="slot ${sl.count>=MAX?'full':'free'}" style="cursor:pointer" onclick="mostrarClientesSlot('${dk}',${h})"><span class="slot-count" style="color:${cor}">${sl.count}/${MAX}</span></div>`;
+      });
+    });
+    gh+='</div>';
+    document.getElementById('grid-presencas-agenda').innerHTML=gh;
+  }
   const tbody=document.getElementById('tbody-presencas');
   if(rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--text3);padding:16px;text-align:center">Nenhuma sessão esta semana.</td></tr>';return;}
   tbody.innerHTML=rows.map(r=>{
