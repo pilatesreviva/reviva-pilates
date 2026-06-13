@@ -683,7 +683,7 @@ async function fazerLogin(){
       const cpf5=document.getElementById('colab-cpf5').value.trim();
       const nasc=document.getElementById('colab-nasc-login').value;
       if(!cpf5||cpf5.length<5||!nasc){showMsg('login-msg','Preencha os 5 dígitos do CPF e a data de nascimento.','err');return;}
-      const rows=await sbGet('colaboradoras',`cpf=like.${cpf5}%&ativo=eq.true`);
+      const rows=await sbGet('colaboradoras',`cpf=like.${cpf5}*&ativo=eq.true`);
       if(!rows||rows.length===0){showMsg('login-msg','CPF não encontrado ou colaboradora inativa.','err');return;}
       const col=rows.find(r=>fmtNasc(r.nascimento)===fmtNasc(nasc));
       if(!col){showMsg('login-msg','Data de nascimento incorreta.','err');return;}
@@ -695,7 +695,7 @@ async function fazerLogin(){
       const cpf5=document.getElementById('cli-cpf5').value.trim();
       const nasc=document.getElementById('cli-nasc-login').value;
       if(!cpf5||cpf5.length<5||!nasc){showMsg('login-msg','Preencha os 5 dígitos do CPF e a data de nascimento.','err');return;}
-      const rows=await sbGet('clientes',`cpf=like.${cpf5}%&ativo=eq.true`);
+      const rows=await sbGet('clientes',`cpf=like.${cpf5}*&ativo=eq.true`);
       if(!rows||rows.length===0){showMsg('login-msg','CPF não encontrado ou cliente inativo.','err');return;}
       const cli=rows.find(r=>fmtNasc(r.nascimento)===fmtNasc(nasc));
       if(!cli){showMsg('login-msg','Data de nascimento incorreta.','err');return;}
