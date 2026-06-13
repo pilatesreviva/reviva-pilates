@@ -259,6 +259,7 @@ input,select,button,textarea{font-family:var(--font)}
     <button class="tab-btn active" id="tab-cli-btn" onclick="switchTab('cli')">Clientes</button>
     <button class="tab-btn" id="tab-col-btn" onclick="switchTab('col')">Colaboradoras</button>
     <button class="tab-btn" id="tab-exp-btn" onclick="switchTab('exp')">Experimentais</button>
+    <button class="tab-btn" id="tab-rel-btn" onclick="switchTab('rel')">Relatórios</button>
   </div>
   <div id="tab-cli">
     <div class="card">
@@ -358,18 +359,11 @@ input,select,button,textarea{font-family:var(--font)}
         <div class="field"><label>Telefone *</label><input type="tel" id="exp-tel" placeholder="(81) 9 0000-0000"></div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Data da aula *</label><input type="date" id="exp-data"></div>
-        <div class="field"><label>Turno</label>
-          <select id="exp-turno" onchange="renderExpHoras()">
-            <option value="manha">Manhã — Thayane</option>
-            <option value="tarde">Tarde — Rebeka</option>
-          </select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Horário</label><select id="exp-hora"></select></div>
+        <div class="field"><label>Data da aula *</label><input type="date" id="exp-data" onchange="renderExpSlots()"></div>
         <div class="field"><label>Observação</label><input type="text" id="exp-obs" placeholder="Ex: indicação, interesse..."></div>
       </div>
+      <input type="hidden" id="exp-hora">
+      <div id="exp-slots-wrap" style="margin:8px 0"></div>
       <button class="btn primary full" onclick="agendarExperimental()" style="margin-top:4px"><i class="ti ti-calendar-plus"></i> Agendar experimental</button>
       <div id="msg-exp"></div>
     </div>
@@ -380,6 +374,25 @@ input,select,button,textarea{font-family:var(--font)}
           <th>Nome</th><th>Telefone</th><th>Data</th><th>Hora</th><th>Inst.</th><th>Obs.</th><th>Status</th><th></th>
         </tr></thead><tbody id="tbody-exp"></tbody></table>
       </div>
+    </div>
+  </div>
+
+  <!-- ABA RELATÓRIOS -->
+  <div id="tab-rel" style="display:none">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-chart-bar"></i> Relatório mensal por cliente</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Selecione o mês para ver assiduidade de cada cliente.</div>
+      <div class="field-row" style="align-items:flex-end">
+        <div class="field" style="margin-bottom:0"><label>Mês</label><input type="month" id="rel-mes"></div>
+        <button class="btn primary" onclick="gerarRelatorioMensal()" style="margin-bottom:0"><i class="ti ti-refresh"></i> Gerar</button>
+      </div>
+      <div id="rel-resultado" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-users"></i> Assiduidade semanal por colaboradora</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Percentual de presença dos alunos de cada instrutora na semana atual.</div>
+      <button class="btn primary" onclick="gerarRelatorioSemanal()"><i class="ti ti-refresh"></i> Calcular semana atual</button>
+      <div id="rel-col-resultado" style="margin-top:14px"></div>
     </div>
   </div>
 </div>
@@ -450,6 +463,18 @@ input,select,button,textarea{font-family:var(--font)}
         <div class="modal-footer">
           <button class="btn" onclick="fecharModalEditCol()">Cancelar</button>
           <button class="btn primary" onclick="salvarEdicaoCol()"><i class="ti ti-check"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CLIENTES DO HORÁRIO -->
+    <div class="modal-overlay" id="modal-slot-cli" onclick="if(event.target===this)this.classList.remove('open')">
+      <div class="modal-box">
+        <h3><i class="ti ti-users" style="color:var(--accent)"></i> Clientes no horário</h3>
+        <div id="modal-slot-info" style="font-size:12px;color:var(--text2);margin-bottom:10px"></div>
+        <div id="modal-slot-lista"></div>
+        <div class="modal-footer" style="margin-top:12px">
+          <button class="btn" onclick="document.getElementById('modal-slot-cli').classList.remove('open')">Fechar</button>
         </div>
       </div>
     </div>
@@ -748,14 +773,18 @@ function setMode(m){
 }
 
 function switchTab(tab){
-  ['cli','col','exp'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
-    document.getElementById('tab-'+t+'-btn').classList.toggle('active',t===tab);
+  ['cli','col','exp','rel'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);if(el)el.style.display=t===tab?'block':'none';
+    const btn=document.getElementById('tab-'+t+'-btn');if(btn)btn.classList.toggle('active',t===tab);
   });
   if(tab==='exp'){
-    renderExpHoras();
     if(!document.getElementById('exp-data').value) document.getElementById('exp-data').value=toKey(new Date());
+    renderExpSlots();
     renderTabelaExperimentais();
+  }
+  if(tab==='rel'){
+    const now=new Date();
+    document.getElementById('rel-mes').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   }
 }
 
@@ -1224,15 +1253,22 @@ function renderPresencas(){
     });
   }
   let totalP=0,totalF=0,totalFJ=0;
+  let mP={manha:0,tarde:0},mF={manha:0,tarde:0},mFJ={manha:0,tarde:0};
   Object.entries(presencasMap).forEach(([k,v])=>{
-    if(k.includes('_aluno_')){if(v==='P')totalP++;else if(v==='F')totalF++;else if(v==='FJ')totalFJ++;}
+    if(!k.includes('_aluno_')) return;
+    const parts=k.split('_');const hora=parseInt(parts[1]);
+    const turno=HORAS_MANHA.includes(hora)?'manha':'tarde';
+    if(v==='P'){totalP++;mP[turno]++;}else if(v==='F'){totalF++;mF[turno]++;}else if(v==='FJ'){totalFJ++;mFJ[turno]++;}
   });
   const tot=totalP+totalF+totalFJ||1;
+  const totM=mP.manha+mF.manha+mFJ.manha||1;const totT=mP.tarde+mF.tarde+mFJ.tarde||1;
   document.getElementById('stat-grid').innerHTML=`
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">${totalP}</div><div class="stat-lbl">Presenças</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--red)">${totalF}</div><div class="stat-lbl">Faltas</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--yellow)">${totalFJ}</div><div class="stat-lbl">Faltas just.</div></div>
-    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">% Presença</div></div>`;
+    <div class="stat-card"><div class="stat-num">${Math.round(totalP/tot*100)}%</div><div class="stat-lbl">% Presença</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:14px">${Math.round(mP.manha/totM*100)}%</div><div class="stat-lbl"><span class="badge manha" style="font-size:8px">TH</span> Thayane</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:14px">${Math.round(mP.tarde/totT*100)}%</div><div class="stat-lbl"><span class="badge tarde" style="font-size:8px">RE</span> Rebeka</div></div>`;
   const tbody=document.getElementById('tbody-presencas');
   if(rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--text3);padding:16px;text-align:center">Nenhuma sessão esta semana.</td></tr>';return;}
   tbody.innerHTML=rows.map(r=>{
@@ -1241,7 +1277,7 @@ function renderPresencas(){
     const sv=presencasMap[chave]||'';
     return`<tr>
       <td style="white-space:nowrap">${fmt}</td>
-      <td>${String(r.hour).padStart(2,'0')}h</td>
+      <td style="cursor:pointer;color:var(--accent);text-decoration:underline" onclick="mostrarClientesSlot('${r.date}',${r.hour})" title="Ver todos do horário">${String(r.hour).padStart(2,'0')}h</td>
       <td><span class="badge ${r.isManha?'manha':'tarde'}" style="font-size:9px">${r.isManha?'TH':'RE'}</span></td>
       <td style="font-size:11px;font-weight:500">${r.nome}</td>
       <td><select class="status-sel" onchange="setPresenca('${r.date}_${r.hour}','aluno','${r.codigo}',this.value)">
@@ -1334,17 +1370,135 @@ async function renderAvailGrid(){
       if(isHoliday(d)){html+=`<div class="slot holiday"><span style="font-size:8px;color:var(--yellow)">Fer</span></div>`;return;}
       const livre=MAX-sl.count;const cls=sl.count>=MAX?'full':'free';
       const cor=sl.count>=MAX?'var(--red)':sl.count>=3?'var(--yellow)':'var(--green)';
-      html+=`<div class="slot ${cls}" style="cursor:default"><span class="slot-count" style="color:${cor}">${livre}v</span></div>`;
+      const canClick=currentUser&&(currentUser.tipo==='admin'||currentUser.tipo==='colaboradora')&&sl.count>0;
+      html+=`<div class="slot ${cls}" style="cursor:${canClick?'pointer':'default'}"${canClick?` onclick="mostrarClientesSlot('${dk}',${h})"`:''}><span class="slot-count" style="color:${cor}">${livre}v</span></div>`;
     });
   });
   html+='</div>';document.getElementById('grid-avail').innerHTML=html;
 }
 
-function renderExpHoras(){
-  const turno=document.getElementById('exp-turno')?.value||'manha';
-  const horas=turno==='manha'?HORAS_MANHA:HORAS_TARDE;
-  const sel=document.getElementById('exp-hora');if(!sel)return;sel.innerHTML='';
-  horas.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=String(h).padStart(2,'0')+'h';sel.appendChild(o);});
+async function renderExpSlots(){
+  const data=document.getElementById('exp-data').value;
+  const wrap=document.getElementById('exp-slots-wrap');
+  if(!data){wrap.innerHTML='';return;}
+  const d=new Date(data+'T12:00');
+  if(isHoliday(d)){wrap.innerHTML='<div class="alert warn">Feriado — sem atendimento.</div>';return;}
+  if(isWeekend(d)){wrap.innerHTML='<div class="alert warn">Sem atendimento no final de semana.</div>';return;}
+  wrap.innerHTML='<div style="font-size:11px;color:var(--text3)">Carregando horários...</div>';
+  const rows=await sbGet('agendamentos',`data_slot=eq.${data}&select=hora`);
+  const contagem={};(rows||[]).forEach(r=>{contagem[r.hora]=(contagem[r.hora]||0)+1;});
+  const sel=document.getElementById('exp-hora');
+  let html='<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Clique em um horário para selecionar:</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  ALL_HORAS.forEach(h=>{
+    const cnt=contagem[h]||0;const livre=MAX-cnt;
+    const full=livre<=0;
+    const isManha=HORAS_MANHA.includes(h);
+    const cor=full?'var(--red)':cnt>=3?'var(--yellow)':'var(--green)';
+    const turnoLabel=isManha?'TH':'RE';
+    html+=`<div class="slot-exp ${full?'full':'free'}" data-hora="${h}" onclick="${full?'':'selecionarSlotExp('+h+')'}" style="cursor:${full?'not-allowed':'pointer'};min-width:60px;padding:6px 8px;border-radius:6px;border:1px solid var(--border);text-align:center;background:var(--surface2);opacity:${full?'0.45':'1'}">
+      <span class="badge ${isManha?'manha':'tarde'}" style="font-size:7px;padding:1px 3px">${turnoLabel}</span>
+      <div style="font-size:13px;font-weight:600;margin:2px 0">${String(h).padStart(2,'0')}h</div>
+      <div style="font-size:10px;color:${cor}">${full?'Lotado':livre+'v'}</div>
+    </div>`;
+  });
+  html+='</div><div id="exp-hora-msg" style="margin-top:8px;font-size:12px;color:var(--accent)"></div>';
+  wrap.innerHTML=html;
+  if(sel.value) selecionarSlotExp(parseInt(sel.value));
+}
+
+function selecionarSlotExp(h){
+  document.getElementById('exp-hora').value=h;
+  document.querySelectorAll('.slot-exp').forEach(el=>{
+    const isSelected=parseInt(el.dataset.hora)===h;
+    el.style.border=isSelected?'2px solid var(--accent)':'1px solid var(--border)';
+    el.style.background=isSelected?'var(--accent-dim,rgba(99,102,241,0.15))':'var(--surface2)';
+  });
+  const isManha=HORAS_MANHA.includes(h);
+  const inst=isManha?'Thayane (Manhã)':'Rebeka (Tarde)';
+  const msg=document.getElementById('exp-hora-msg');
+  if(msg)msg.textContent=`Selecionado: ${String(h).padStart(2,'0')}h — ${inst}`;
+}
+
+async function mostrarClientesSlot(dk,h){
+  const modal=document.getElementById('modal-slot-cli');
+  const info=document.getElementById('modal-slot-info');
+  const lista=document.getElementById('modal-slot-lista');
+  const isManha=HORAS_MANHA.includes(h);
+  const inst=isManha?'Thayane':'Rebeka';
+  const dtFmt=new Date(dk+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  info.textContent=`${dtFmt} — ${String(h).padStart(2,'0')}h (${inst})`;
+  lista.innerHTML='<div style="color:var(--text3);font-size:12px">Carregando...</div>';
+  modal.classList.add('open');
+  try{
+    const rows=await sbGet('agendamentos',`data_slot=eq.${dk}&hora=eq.${h}&select=cliente_nome,cliente_codigo&order=cliente_nome.asc`);
+    if(!rows||rows.length===0){lista.innerHTML='<div style="color:var(--text3);font-size:12px;text-align:center;padding:12px">Nenhum cliente agendado.</div>';return;}
+    lista.innerHTML=rows.map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <div class="avatar" style="width:30px;height:30px;font-size:11px;border-radius:50%;background:var(--accent-dim,rgba(99,102,241,0.2));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)">${iniciais(r.cliente_nome||'?')}</div>
+      <div><div style="font-size:13px;font-weight:500">${r.cliente_nome||'—'}</div><div style="font-size:10px;color:var(--text3)">${r.cliente_codigo||''}</div></div>
+    </div>`).join('');
+  } catch(e){lista.innerHTML='<div class="alert err">Erro ao carregar.</div>';}
+}
+
+async function gerarRelatorioMensal(){
+  const mes=document.getElementById('rel-mes').value;
+  const res=document.getElementById('rel-resultado');
+  if(!mes){res.innerHTML='<div class="alert err">Selecione um mês.</div>';return;}
+  const [ano,m]=mes.split('-');
+  const inicio=`${ano}-${m}-01`;
+  const fim=new Date(ano,m,0);const fimStr=toKey(fim);
+  res.innerHTML='<div style="color:var(--text3);font-size:12px">Carregando...</div>';
+  try{
+    const [pres,clientes]=await Promise.all([
+      sbGet('presencas',`data_slot=gte.${inicio}&data_slot=lte.${fimStr}&tipo=eq.aluno`),
+      sbGet('clientes','ativo=eq.true&select=codigo,nome&order=nome.asc')
+    ]);
+    const stats={};
+    (pres||[]).forEach(p=>{
+      if(!stats[p.codigo])stats[p.codigo]={P:0,F:0,FJ:0};
+      if(p.status==='P')stats[p.codigo].P++;
+      else if(p.status==='F')stats[p.codigo].F++;
+      else if(p.status==='FJ')stats[p.codigo].FJ++;
+    });
+    const cliMap={};(clientes||[]).forEach(c=>{cliMap[c.codigo]=c.nome;});
+    const codigos=Object.keys(stats).sort((a,b)=>(cliMap[a]||a).localeCompare(cliMap[b]||b));
+    if(codigos.length===0){res.innerHTML='<div class="alert warn">Nenhuma presença registrada neste mês.</div>';return;}
+    const nomeMes=new Date(ano,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    let html=`<div style="font-size:12px;color:var(--text3);margin-bottom:8px">Mês: <strong>${nomeMes}</strong></div>
+    <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Cliente</th><th style="color:var(--green)">P</th><th style="color:var(--red)">F</th><th style="color:var(--yellow)">FJ</th><th>Total</th><th>%</th></tr></thead><tbody>`;
+    codigos.forEach(cod=>{
+      const s=stats[cod];const tot=s.P+s.F+s.FJ||1;const pct=Math.round(s.P/tot*100);
+      const cor=pct>=80?'var(--green)':pct>=60?'var(--yellow)':'var(--red)';
+      html+=`<tr><td style="font-weight:500">${cliMap[cod]||cod}</td><td style="color:var(--green);font-weight:600">${s.P}</td><td style="color:var(--red)">${s.F}</td><td style="color:var(--yellow)">${s.FJ}</td><td>${s.P+s.F+s.FJ}</td><td style="color:${cor};font-weight:600">${pct}%</td></tr>`;
+    });
+    html+='</tbody></table></div>';
+    res.innerHTML=html;
+  } catch(e){res.innerHTML='<div class="alert err">Erro ao gerar relatório.</div>';}
+}
+
+async function gerarRelatorioSemanal(){
+  const res=document.getElementById('rel-col-resultado');
+  res.innerHTML='<div style="color:var(--text3);font-size:12px">Carregando...</div>';
+  try{
+    const ws=getWeekMon(0);const we=new Date(ws);we.setDate(we.getDate()+6);
+    const pres=await sbGet('presencas',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&tipo=eq.aluno`);
+    const stats={manha:{nome:'Thayane (Manhã)',P:0,F:0,FJ:0},tarde:{nome:'Rebeka (Tarde)',P:0,F:0,FJ:0}};
+    (pres||[]).forEach(p=>{
+      const turno=HORAS_MANHA.includes(p.hora)?'manha':'tarde';
+      if(p.status==='P')stats[turno].P++;
+      else if(p.status==='F')stats[turno].F++;
+      else if(p.status==='FJ')stats[turno].FJ++;
+    });
+    const semana=fmtWeek(ws);
+    let html=`<div style="font-size:12px;color:var(--text3);margin-bottom:8px">Semana: <strong>${semana}</strong></div>
+    <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Colaboradora</th><th style="color:var(--green)">P</th><th style="color:var(--red)">F</th><th style="color:var(--yellow)">FJ</th><th>Total</th><th>%</th></tr></thead><tbody>`;
+    ['manha','tarde'].forEach(t=>{
+      const s=stats[t];const tot=s.P+s.F+s.FJ||1;const pct=Math.round(s.P/tot*100);
+      const cor=pct>=80?'var(--green)':pct>=60?'var(--yellow)':'var(--red)';
+      html+=`<tr><td><span class="badge ${t}" style="font-size:9px">${t==='manha'?'TH':'RE'}</span> ${s.nome}</td><td style="color:var(--green);font-weight:600">${s.P}</td><td style="color:var(--red)">${s.F}</td><td style="color:var(--yellow)">${s.FJ}</td><td>${s.P+s.F+s.FJ}</td><td style="color:${cor};font-weight:600">${pct}%</td></tr>`;
+    });
+    html+='</tbody></table></div>';
+    res.innerHTML=html;
+  } catch(e){res.innerHTML='<div class="alert err">Erro ao gerar relatório.</div>';}
 }
 
 async function agendarExperimental(){
@@ -1354,6 +1508,7 @@ async function agendarExperimental(){
   const hora=parseInt(document.getElementById('exp-hora').value);
   const obs=document.getElementById('exp-obs').value.trim();
   if(!nome||!tel||!data){showMsg('msg-exp','Nome, telefone e data são obrigatórios.','err');return;}
+  if(!hora&&hora!==0){showMsg('msg-exp','Selecione um horário no calendário abaixo.','err');return;}
   const d=new Date(data+'T12:00');
   if(isHoliday(d)){showMsg('msg-exp','Esta data é feriado — sem atendimento.','warn');return;}
   if(isWeekend(d)){showMsg('msg-exp','Sem atendimento no final de semana.','warn');return;}
@@ -1365,6 +1520,8 @@ async function agendarExperimental(){
     const res=await sbPost('experimentais',body);
     if(res&&res[0]){
       ['exp-nome','exp-tel','exp-obs'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('exp-hora').value='';
+      renderExpSlots();
       showMsg('msg-exp','Experimental agendado para '+new Date(data+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})+' às '+String(hora).padStart(2,'0')+'h!','ok');
       renderTabelaExperimentais();
     } else showMsg('msg-exp','Erro ao agendar. Verifique o console.','err');
