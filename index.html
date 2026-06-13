@@ -1428,9 +1428,14 @@ async function initVagas(){
   try{
     const ws=getWeekMon(wkOff.avail);
     const we=new Date(ws);we.setDate(we.getDate()+6);
-    const rows=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&select=data_slot,hora`);
+    const rows=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&select=data_slot,hora,cliente_nome,cliente_codigo`);
     slots={};
-    if(rows) rows.forEach(r=>{const sl=getSlot(r.data_slot,r.hora);sl.count++;});
+    if(rows) rows.forEach(r=>{
+      const sl=getSlot(r.data_slot,r.hora);
+      sl.count++;
+      if(!sl.agendamentos) sl.agendamentos=[];
+      sl.agendamentos.push({nome:r.cliente_nome,codigo:r.cliente_codigo});
+    });
     renderAvailGrid();
   } finally{loading(false);}
 }
@@ -1498,7 +1503,8 @@ async function renderAvailGrid(){
       const livre=MAX-sl.count;const cls=sl.count>=MAX?'full':'free';
       const cor=sl.count>=MAX?'var(--red)':sl.count>=3?'var(--yellow)':'var(--green)';
       const canClick=currentUser&&(currentUser.tipo==='admin'||currentUser.tipo==='colaboradora')&&sl.count>0;
-      html+=`<div class="slot ${cls}" style="cursor:${canClick?'pointer':'default'}"${canClick?` onclick="mostrarClientesSlot('${dk}',${h})"`:''}><span class="slot-count" style="color:${cor}">${livre}v</span></div>`;
+      const nomes=(sl.agendamentos||[]).map(a=>`<div style="font-size:8px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:var(--text2)">${a.nome.split(' ')[0]}</div>`).join('');
+      html+=`<div class="slot ${cls}" style="cursor:${canClick?'pointer':'default'};flex-direction:column;align-items:flex-start;padding:2px 4px;gap:1px"${canClick?` onclick="mostrarClientesSlot('${dk}',${h})"`:''}>${canClick?nomes:`<span class="slot-count" style="color:${cor}">${livre}v</span>`}${canClick?`<span style="font-size:7px;color:${cor};font-weight:600">${livre}v</span>`:''}</div>`;
     });
   });
   html+='</div>';document.getElementById('grid-avail').innerHTML=html;
