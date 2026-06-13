@@ -306,7 +306,7 @@ input,select,button,textarea{font-family:var(--font)}
       <div class="card-title"><i class="ti ti-users"></i> Clientes <span id="total-cli" style="font-size:11px;font-weight:400;color:var(--text3)"></span></div>
       <input type="text" id="busca-cli" placeholder="Buscar por nome ou código..." style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;color:var(--text);outline:none;margin-bottom:10px" oninput="renderTabelaClientes()">
       <div style="overflow-x:auto"><table class="data-table"><thead><tr>
-        <th>Código</th><th>Nome</th><th>Créditos</th><th>Pgto.</th><th>Status</th><th></th>
+        <th>Código</th><th>Nome</th><th>Créditos</th><th>Pgto.</th><th>Freq.</th><th>Status</th><th></th>
       </tr></thead><tbody id="tbody-cli"></tbody></table></div>
     </div>
   </div>
@@ -431,11 +431,22 @@ input,select,button,textarea{font-family:var(--font)}
           </div>
           <div class="field"><label>Créditos</label><input type="number" id="edit-cli-cred" min="0" style="width:100%"></div>
         </div>
-        <div class="field"><label>Status</label>
-          <select id="edit-cli-ativo">
-            <option value="true">Ativo</option>
-            <option value="false">Inativo</option>
-          </select>
+        <div class="field-row">
+          <div class="field"><label>Frequência semanal</label>
+            <select id="edit-cli-freq">
+              <option value="">— não definida —</option>
+              <option value="2">2×/semana</option>
+              <option value="3">3×/semana</option>
+              <option value="4">4×/semana</option>
+              <option value="5">5×/semana</option>
+            </select>
+          </div>
+          <div class="field"><label>Status</label>
+            <select id="edit-cli-ativo">
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+          </div>
         </div>
         <div id="msg-edit-cli" style="margin-top:8px;font-size:12px"></div>
         <div class="modal-footer">
@@ -478,18 +489,19 @@ input,select,button,textarea{font-family:var(--font)}
       </div>
     </div>
 
-    <!-- MODAL CLIENTES DO HORÁRIO -->
-    <div class="modal-overlay" id="modal-slot-cli" onclick="if(event.target===this)this.classList.remove('open')">
-      <div class="modal-box">
-        <h3><i class="ti ti-users" style="color:var(--accent)"></i> Clientes no horário</h3>
-        <div id="modal-slot-info" style="font-size:12px;color:var(--text2);margin-bottom:10px"></div>
-        <div id="modal-slot-lista"></div>
-        <div class="modal-footer" style="margin-top:12px">
-          <button class="btn" onclick="document.getElementById('modal-slot-cli').classList.remove('open')">Fechar</button>
-        </div>
-      </div>
-    </div>
 
+</div>
+
+<!-- MODAL CLIENTES DO HORÁRIO — fora de todos os screens para funcionar em qualquer tela -->
+<div class="modal-overlay" id="modal-slot-cli" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <h3><i class="ti ti-users" style="color:var(--accent)"></i> Clientes no horário</h3>
+    <div id="modal-slot-info" style="font-size:12px;color:var(--text2);margin-bottom:10px"></div>
+    <div id="modal-slot-lista"></div>
+    <div class="modal-footer" style="margin-top:12px">
+      <button class="btn" onclick="document.getElementById('modal-slot-cli').classList.remove('open')">Fechar</button>
+    </div>
+  </div>
 </div>
 
 <!-- AGENDA CLIENTE -->
@@ -893,6 +905,7 @@ async function renderTabelaClientes(){
           ${c.credito_validade?`<div style="font-size:9px;margin-top:2px;color:${new Date(c.credito_validade+'T23:59:59')<new Date()?'var(--red)':'var(--text3)'}">${new Date(c.credito_validade+'T23:59:59')<new Date()?'⚠ Vencido':'Vence'} ${fmtData(c.credito_validade)}</div>`:'<div style="font-size:9px;color:var(--text3);margin-top:2px">Sem vencimento</div>'}
         </td>
         <td><span class="badge ${PAG_CLS[c.pagamento]||'pix'}">${PAG_LABEL[c.pagamento]||'PIX'}</span></td>
+        <td style="font-size:11px;color:var(--text2)">${c.frequencia?c.frequencia+'×/sem':'—'}</td>
         <td><span class="${c.ativo?'badge ativo':'badge inativo'}" onclick="toggleCli('${c.id}',${!c.ativo})">${c.ativo?'Ativo':'Inativo'}</span></td>
         <td style="display:flex;gap:4px">
           <button class="btn sm" onclick="editarCliente('${c.id}')"><i class="ti ti-pencil"></i></button>
@@ -984,6 +997,7 @@ function editarCliente(id){
   document.getElementById('edit-cli-tel').value=c.telefone||'';
   document.getElementById('edit-cli-pag').value=c.pagamento||'pix';
   document.getElementById('edit-cli-cred').value=c.creditos||0;
+  document.getElementById('edit-cli-freq').value=c.frequencia||'';
   document.getElementById('edit-cli-ativo').value=String(c.ativo!==false);
   document.getElementById('msg-edit-cli').textContent='';
   document.getElementById('modal-edit-cli').classList.add('open');
@@ -1002,6 +1016,7 @@ async function salvarEdicaoCli(){
     telefone:document.getElementById('edit-cli-tel').value.trim(),
     pagamento:document.getElementById('edit-cli-pag').value,
     creditos:parseInt(document.getElementById('edit-cli-cred').value)||0,
+    frequencia:parseInt(document.getElementById('edit-cli-freq').value)||null,
     ativo:document.getElementById('edit-cli-ativo').value==='true'
   };
   loading(true,'Salvando...');
