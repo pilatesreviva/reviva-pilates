@@ -426,6 +426,14 @@ input,select,button,textarea{font-family:var(--font)}
       </div>
       <div class="agenda-wrap" style="margin-top:8px"><div id="grid-agenda-admin"></div></div>
     </div>
+    <!-- Painel de detalhe do slot selecionado -->
+    <div class="card" id="admin-slot-painel" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600" id="admin-slot-titulo"></div>
+        <button class="btn sm" onclick="document.getElementById('admin-slot-painel').style.display='none'"><i class="ti ti-x"></i></button>
+      </div>
+      <div id="admin-slot-lista"></div>
+    </div>
   </div>
 </div>
     <!-- MODAL EDITAR CLIENTE -->
@@ -891,19 +899,20 @@ function switchTab(tab){
 }
 
 let wkAgendaAdmin=0;
-function navSemanaAgenda(d){wkAgendaAdmin+=d;initAgendaAdmin();}
+let agendaAdminData={};
+function navSemanaAgenda(d){wkAgendaAdmin+=d;document.getElementById('admin-slot-painel').style.display='none';initAgendaAdmin();}
 
 async function initAgendaAdmin(){
   const ws=getWeekMon(wkAgendaAdmin);
   const we=new Date(ws);we.setDate(we.getDate()+6);
   document.getElementById('week-agenda-admin').textContent=fmtWeek(ws);
   document.getElementById('grid-agenda-admin').innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px">Carregando...</div>';
-  const rows=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&select=data_slot,hora,cliente_nome`);
-  const agSlots={};
+  const rows=await sbGet('agendamentos',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&select=id,data_slot,hora,cliente_nome,cliente_codigo`);
+  agendaAdminData={};
   (rows||[]).forEach(r=>{
     const k=r.data_slot+'_'+r.hora;
-    if(!agSlots[k])agSlots[k]=[];
-    agSlots[k].push((r.cliente_nome||'?').split(' ')[0]);
+    if(!agendaAdminData[k])agendaAdminData[k]=[];
+    agendaAdminData[k].push({id:r.id,nome:r.cliente_nome||'?',codigo:r.cliente_codigo||''});
   });
   const days=[];for(let i=0;i<5;i++){const d=new Date(ws);d.setDate(d.getDate()+i);days.push(d);}
   let html='<div class="grid grid-5"><div class="gh"></div>';
@@ -916,16 +925,56 @@ async function initAgendaAdmin(){
       const dk=toKey(d);
       if(isHoliday(d)){html+=`<div class="slot holiday"><span style="font-size:8px;color:var(--yellow)">Fer</span></div>`;return;}
       if(isWeekend(d)){html+=`<div class="slot" style="background:var(--bg2)"></div>`;return;}
-      const nomes=agSlots[dk+'_'+h]||[];
-      const cnt=nomes.length;const livre=MAX-cnt;
+      const clientes=agendaAdminData[dk+'_'+h]||[];
+      const cnt=clientes.length;const livre=MAX-cnt;
       const cor=cnt>=MAX?'var(--red)':cnt>=3?'var(--yellow)':'var(--green)';
       const cls=cnt>=MAX?'full':'free';
-      const tip=nomes.length>0?nomes.join('\n'):'';
-      html+=`<div class="slot ${cls}"${tip?` data-tip="${tip.replace(/"/g,'&quot;')}"`:''}><span class="slot-count" style="color:${cor}">${cnt>0?cnt+'/'+MAX:livre+'v'}</span></div>`;
+      const tip=cnt>0?clientes.map(c=>c.nome.split(' ')[0]).join('\n'):'';
+      const oc=cnt>0?` onclick="abrirSlotAdmin('${dk}',${h})" style="cursor:pointer"`:'';
+      html+=`<div class="slot ${cls}"${tip?` data-tip="${tip.replace(/"/g,'&quot;')}"`:''}${oc}><span class="slot-count" style="color:${cor}">${cnt>0?cnt+'/'+MAX:livre+'v'}</span></div>`;
     });
   });
   html+='</div>';
   document.getElementById('grid-agenda-admin').innerHTML=html;
+}
+
+function abrirSlotAdmin(dk,h){
+  const clientes=agendaAdminData[dk+'_'+h]||[];
+  const isManha=HORAS_MANHA.includes(h);
+  const inst=isManha?'Thayane':'Rebeka';
+  const dtFmt=new Date(dk+'T12:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  document.getElementById('admin-slot-titulo').textContent=`${dtFmt} — ${String(h).padStart(2,'0')}h (${inst})`;
+  const lista=document.getElementById('admin-slot-lista');
+  if(clientes.length===0){
+    lista.innerHTML='<div style="font-size:12px;color:var(--text3)">Nenhum cliente neste horário.</div>';
+  } else {
+    lista.innerHTML=clientes.map(c=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-dim,rgba(99,102,241,0.15));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0">${iniciais(c.nome)}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${c.nome}</div><div style="font-size:10px;color:var(--text3)">${c.codigo}</div></div>
+        <button class="btn sm danger" onclick="removerDoSlot(${c.id},'${dk}',${h},'${c.nome.replace(/'/g,"\\'")}')" title="Remover do horário"><i class="ti ti-trash"></i></button>
+      </div>`).join('');
+  }
+  const painel=document.getElementById('admin-slot-painel');
+  painel.style.display='block';
+  painel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+async function removerDoSlot(id,dk,h,nome){
+  if(!confirm(`Remover ${nome} do horário?`)) return;
+  const entrada=(agendaAdminData[dk+'_'+h]||[]).find(c=>c.id===id);
+  loading(true,'Removendo...');
+  try{
+    await sbDelete('agendamentos','id=eq.'+id);
+    if(entrada&&entrada.codigo){
+      const cliRow=await sbGet('clientes',`codigo=eq.${entrada.codigo}&select=id,creditos`);
+      if(cliRow&&cliRow[0]) await sbPatch('clientes','id=eq.'+cliRow[0].id,{creditos:cliRow[0].creditos+1});
+    }
+    if(agendaAdminData[dk+'_'+h]) agendaAdminData[dk+'_'+h]=agendaAdminData[dk+'_'+h].filter(c=>c.id!==id);
+    abrirSlotAdmin(dk,h);
+    initAgendaAdmin();
+  } catch(e){alert('Erro ao remover.');}
+  finally{loading(false);}
 }
 
 function switchAgendaTab(tab){
