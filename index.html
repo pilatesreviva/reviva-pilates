@@ -82,6 +82,9 @@ input,select,button,textarea{font-family:var(--font)}
 .badge.pix{background:var(--green-dim);color:var(--green)}
 .badge.debito{background:var(--blue-dim);color:var(--blue)}
 .badge.credito{background:var(--tarde-dim);color:var(--tarde)}
+.badge.cartao{background:var(--blue-dim);color:var(--blue)}
+.badge.dinheiro{background:var(--yellow-dim);color:var(--yellow)}
+.badge.boleto{background:var(--bg3);color:var(--text2)}
 .code-tag{font-family:monospace;font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--text2);border:0.5px solid var(--border)}
 .alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;margin-top:10px}
 .alert.ok{background:var(--green-dim);color:var(--green);border:0.5px solid rgba(74,222,128,0.2)}
@@ -288,8 +291,9 @@ input,select,button,textarea{font-family:var(--font)}
         <div class="field"><label>Pagamento</label>
           <select id="c-pag">
             <option value="pix">PIX</option>
-            <option value="debito">Débito</option>
-            <option value="credito">Crédito</option>
+            <option value="cartao">Cartão</option>
+            <option value="dinheiro">Dinheiro</option>
+            <option value="boleto">Boleto</option>
           </select>
         </div>
       </div>
@@ -723,8 +727,8 @@ const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const ADMIN_SENHA='Reviv4pilates';
 const NETLIFY='https://pilatesreviva.github.io/reviva-pilates';
 const TURNO_LABEL={manha:'Manhã',tarde:'Tarde',todos:'Ambos'};
-const PAG_LABEL={pix:'PIX',debito:'Débito',credito:'Crédito'};
-const PAG_CLS={pix:'pix',debito:'debito',credito:'credito'};
+const PAG_LABEL={pix:'PIX',cartao:'Cartão',dinheiro:'Dinheiro',boleto:'Boleto'};
+const PAG_CLS={pix:'pix',cartao:'cartao',dinheiro:'dinheiro',boleto:'boleto'};
 const TURNO_CLS={manha:'manha',tarde:'tarde',todos:'admin'};
 const FREQ_OPCOES=[{freq:2,cred:9,label:'2×/sem'},{freq:3,cred:13,label:'3×/sem'},{freq:4,cred:17,label:'4×/sem'},{freq:5,cred:21,label:'5×/sem'}];
 
@@ -790,8 +794,16 @@ function atualizarCredBar(){
 }
 function fmtData(s){if(!s)return'';const p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 
-async function gerarCodigoCli(){const rows=await sbGet('clientes','select=codigo&order=created_at.desc&limit=1');if(rows&&rows.length>0){const n=parseInt(rows[0].codigo.replace('CLI-',''))+1;return 'CLI-'+String(n).padStart(3,'0');}return 'CLI-001';}
-async function gerarCodigoCol(){const rows=await sbGet('colaboradoras','select=codigo&order=created_at.desc&limit=1');if(rows&&rows.length>0){const n=parseInt(rows[0].codigo.replace('COL-',''))+1;return 'COL-'+String(n).padStart(3,'0');}return 'COL-001';}
+async function proximoContador(chave){
+  const rows=await sbGet('contadores',`chave=eq.${chave}&select=valor`);
+  const atual=(rows&&rows[0]&&rows[0].valor)||0;
+  const novo=atual+1;
+  if(rows&&rows.length>0) await sbPatch('contadores','chave=eq.'+chave,{valor:novo});
+  else await sbPost('contadores',[{chave,valor:novo}]);
+  return novo;
+}
+async function gerarCodigoCli(){const n=await proximoContador('cliente');return 'CLI-'+String(n).padStart(3,'0');}
+async function gerarCodigoCol(){const n=await proximoContador('colaboradora');return 'COL-'+String(n).padStart(3,'0');}
 
 function loginTipoChange(){
   const v=document.getElementById('login-tipo').value;
@@ -1069,7 +1081,19 @@ async function reduzirCreditos(id,nome,atual){
 }
 
 async function toggleCli(id,ativo){await sbPatch('clientes','id=eq.'+id,{ativo});renderTabelaClientes();}
-async function excluirCli(id){if(!confirm('Remover este cliente?'))return;await sbDelete('clientes','id=eq.'+id);renderTabelaClientes();}
+async function excluirCli(id){
+  if(!confirm('Remover este cliente? Todos os agendamentos dele também serão excluídos.'))return;
+  loading(true,'Removendo...');
+  try{
+    const codigo=_cliCache[id]&&_cliCache[id].codigo;
+    if(codigo){
+      await sbDelete('agendamentos','cliente_codigo=eq.'+codigo);
+      await sbDelete('presencas','codigo=eq.'+codigo+'&tipo=eq.aluno');
+    }
+    await sbDelete('clientes','id=eq.'+id);
+    renderTabelaClientes();
+  } finally{loading(false);}
+}
 
 async function cadastrarColaboradora(){
   const nome=document.getElementById('col-nome').value.trim();
