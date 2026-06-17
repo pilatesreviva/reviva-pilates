@@ -1404,10 +1404,11 @@ function renderGridCliente(){
       const hasMine=!!meuAgend;
       const cls=hasMine?'mine':sl.count>=MAX?'full':'free';
       const semCred=!hasMine&&creditosLivres()<=0;
+      const aposVenc=!hasMine&&currentUser.credito_validade&&new Date(dk+'T23:59:59')>new Date(currentUser.credito_validade+'T23:59:59');
       const isLocked=hasMine&&bl4;
       let oc='';
       if(hasMine&&!bl4) oc=` onclick="solicitarCancelamento('${meuAgend.id}','${dk}',${h})"`;
-      else if(!hasMine&&sl.count<MAX&&!bl4&&!semCred) oc=` onclick="bookSlot('${dk}',${h})"`;
+      else if(!hasMine&&sl.count<MAX&&!bl4&&!semCred&&!aposVenc) oc=` onclick="bookSlot('${dk}',${h})"`;
       html+=`<div class="slot ${cls}${isLocked?' locked':''}${semCred?' no-credits':''}"${oc} title="${hasMine?'Toque para cancelar':semCred?'Sem créditos':dk+' '+h+'h'}">${isLocked?'<i class="ti ti-lock" style="font-size:8px"></i>':hasMine?'<i class="ti ti-x" style="font-size:8px;color:var(--red)"></i>':''}<span class="slot-count">${sl.count}/${MAX}</span></div>`;
     });
   });
