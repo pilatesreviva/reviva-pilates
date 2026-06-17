@@ -1260,20 +1260,17 @@ async function carregarAgendamentos(){
 
 function renderFreqGrid(){
   const g=document.getElementById('freq-grid');g.innerHTML='';
-  FREQ_OPCOES.forEach(op=>{
-    const ok=currentUser.creditos>=op.freq;
-    const b=document.createElement('button');
-    b.className='freq-btn'+(op.freq===myFreq?' sel':'');
-    b.disabled=!ok;
-    b.textContent=op.label;
-    b.title=ok?'':'Créditos insuficientes';
-    b.onclick=()=>{if(ok){myFreq=op.freq;renderFreqGrid();}};
-    g.appendChild(b);
-  });
-  if(!FREQ_OPCOES.find(o=>o.freq===myFreq&&currentUser.creditos>=o.freq)){
-    const maxOp=FREQ_OPCOES.filter(o=>currentUser.creditos>=o.freq).slice(-1)[0];
-    if(maxOp){myFreq=maxOp.freq;g.querySelectorAll('.freq-btn').forEach((b,i)=>{b.classList.toggle('sel',FREQ_OPCOES[i].freq===myFreq);});}
+  const contratada=currentUser.frequencia;
+  if(!contratada){
+    g.innerHTML='<div style="font-size:11px;color:var(--text3)">Frequência não definida. Contate o estúdio.</div>';
+    myFreq=2;return;
   }
+  myFreq=contratada;
+  const b=document.createElement('button');
+  b.className='freq-btn sel';
+  b.textContent=contratada+'×/sem';
+  b.title='Frequência contratada';
+  g.appendChild(b);
 }
 
 function renderHoraSel(){
