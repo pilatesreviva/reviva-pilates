@@ -1332,6 +1332,7 @@ async function salvarFrequencia(){
 async function bookSlot(dk,h){
   if(isBlocked4h(dk,h)){showMsg('alter-msg','Bloqueado: menos de 4h de antecedência.','err');return;}
   if(creditosVencidos()){showMsg('alter-msg','Seus créditos venceram em '+fmtData(currentUser.credito_validade)+'. Entre em contato com o estúdio para renovar.','err');return;}
+  if(currentUser.credito_validade&&new Date(dk+'T23:59:59')>new Date(currentUser.credito_validade+'T23:59:59')){showMsg('alter-msg','Este horário é após o vencimento dos seus créditos ('+fmtData(currentUser.credito_validade)+').','err');return;}
   if(creditosLivres()<=0){showMsg('alter-msg','Você não tem créditos disponíveis para agendar.','err');return;}
   const sl=getSlot(dk,h);
   if(sl.count>=MAX){showMsg('alter-msg','Horário lotado.','err');return;}
