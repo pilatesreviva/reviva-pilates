@@ -1307,7 +1307,9 @@ async function salvarFrequencia(){
       days.forEach(d=>{
         if(novosSlots.length>=cred) return;
         const dt=new Date(weekStart);dt.setDate(dt.getDate()+d-1);
+        const validade=currentUser.credito_validade?new Date(currentUser.credito_validade+'T23:59:59'):null;
         if(dt<hoje||isHoliday(dt)||isWeekend(dt)) return;
+        if(validade&&dt>validade) return;
         const dk=toKey(dt);
         const sl=getSlot(dk,hora);
         if(sl.count<MAX) novosSlots.push({date:dk,hour:hora});
