@@ -1230,8 +1230,7 @@ async function initClienteView(){
   document.getElementById('cli-avatar').textContent=iniciais(c.nome);
   document.getElementById('cli-nome-hdr').textContent=c.nome;
   document.getElementById('cli-info-hdr').textContent=PAG_LABEL[c.pagamento]+(c.telefone?' · '+c.telefone:'');
-  const op=FREQ_OPCOES.filter(o=>c.creditos>=o.cred).slice(-1)[0];
-  myFreq=op?op.freq:2;
+  myFreq=2;
   renderFreqGrid();
   renderHoraSel();
   document.getElementById('turno-sel').onchange=renderHoraSel;
@@ -1262,18 +1261,12 @@ async function carregarAgendamentos(){
 function renderFreqGrid(){
   const g=document.getElementById('freq-grid');g.innerHTML='';
   FREQ_OPCOES.forEach(op=>{
-    const ok=currentUser.creditos>=op.cred;
     const b=document.createElement('button');
     b.className='freq-btn'+(op.freq===myFreq?' sel':'');
-    b.disabled=!ok;b.textContent=op.label;b.title=ok?op.cred+' créditos necessários':'Créditos insuficientes (necessário: '+op.cred+')';
-    b.onclick=()=>{if(ok){myFreq=op.freq;renderFreqGrid();}};
+    b.textContent=op.label;
+    b.onclick=()=>{myFreq=op.freq;renderFreqGrid();};
     g.appendChild(b);
   });
-  const maxOp=FREQ_OPCOES.filter(o=>currentUser.creditos>=o.cred).slice(-1)[0];
-  if(maxOp&&!FREQ_OPCOES.find(o=>o.freq===myFreq&&currentUser.creditos>=o.cred)){
-    myFreq=maxOp.freq;
-    g.querySelectorAll('.freq-btn').forEach((b,i)=>{b.classList.toggle('sel',FREQ_OPCOES[i].freq===myFreq);});
-  }
 }
 
 function renderHoraSel(){
@@ -1286,21 +1279,29 @@ async function salvarFrequencia(){
   const days=[...document.querySelectorAll('.day-pill.sel')].map(p=>parseInt(p.dataset.d));
   if(days.length!==myFreq){showMsg('freq-msg','Selecione exatamente '+myFreq+' dia(s).','err');return;}
   const hora=parseInt(document.getElementById('hora-sel').value);
+  if(creditosVencidos()){showMsg('freq-msg','Seus créditos venceram em '+fmtData(currentUser.credito_validade)+'. Entre em contato com o estúdio para renovar.','err');return;}
+  const cred=creditos();
+  if(cred<=0){showMsg('freq-msg','Você não possui créditos disponíveis.','err');return;}
   const ws=getWeekMon(0);
   const novosSlots=[];
-  for(let w=0;w<4;w++){
+  let w=0;
+  while(novosSlots.length<cred){
     const weekStart=new Date(ws);weekStart.setDate(weekStart.getDate()+w*7);
+    const slotsThisWeek=[];
     days.forEach(d=>{
       const dt=new Date(weekStart);dt.setDate(dt.getDate()+d-1);
-      const dk=toKey(dt);
       if(isHoliday(dt)||isWeekend(dt)) return;
+      const dk=toKey(dt);
       const sl=getSlot(dk,hora);
-      if(sl.count<MAX) novosSlots.push({date:dk,hour:hora});
+      if(sl.count<MAX) slotsThisWeek.push({date:dk,hour:hora});
     });
-  }
-  if(creditosVencidos()){showMsg('freq-msg','Seus créditos venceram em '+fmtData(currentUser.credito_validade)+'. Entre em contato com o estúdio para renovar.','err');return;}
-  if(novosSlots.length>creditos()){
-    showMsg('freq-msg',`Créditos insuficientes. Você tem ${creditos()} créditos mas esta frequência requer ${novosSlots.length} agendamentos.`,'err');return;
+    if(slotsThisWeek.length===0&&w>52) break;
+    for(const s of slotsThisWeek){
+      if(novosSlots.length>=cred) break;
+      novosSlots.push(s);
+    }
+    w++;
+    if(w>52) break;
   }
   loading(true,'Salvando agendamentos...');
   try{
