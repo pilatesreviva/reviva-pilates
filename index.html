@@ -297,6 +297,9 @@ input,select,button,textarea{font-family:var(--font)}
           </select>
         </div>
       </div>
+      <div class="field-row">
+        <div class="field"><label>Vencimento dos créditos</label><input type="date" id="c-validade"></div>
+      </div>
       <button class="btn primary full" onclick="cadastrarCliente()" style="margin-top:4px"><i class="ti ti-plus"></i> Cadastrar</button>
       <div id="msg-cad-cli"></div>
     </div>
@@ -1012,10 +1015,12 @@ async function cadastrarCliente(){
     const dup=await sbGet('clientes',`cpf=eq.${encodeURIComponent(cpf)}&select=id`);
     if(dup&&dup.length>0){showMsg('msg-cad-cli','Este CPF já está cadastrado.','err');return;}
     const codigo=await gerarCodigoCli();
-    const body={codigo,nome,cpf,nascimento:nasc,telefone:document.getElementById('c-tel').value.trim(),creditos:parseInt(document.getElementById('c-cred').value),pagamento:document.getElementById('c-pag').value,ativo:true};
+    const credVal=parseInt(document.getElementById('c-cred').value);
+    const freqMap={9:2,13:3,17:4,21:5};
+    const body={codigo,nome,cpf,nascimento:nasc,telefone:document.getElementById('c-tel').value.trim(),creditos:credVal,pagamento:document.getElementById('c-pag').value,frequencia:freqMap[credVal]||2,credito_validade:document.getElementById('c-validade').value||null,ativo:true};
     const res=await sbPost('clientes',body);
     if(res&&res[0]){
-      ['c-nome','c-cpf','c-nasc','c-tel'].forEach(id=>document.getElementById(id).value='');
+      ['c-nome','c-cpf','c-nasc','c-tel','c-validade'].forEach(id=>document.getElementById(id).value='');
       showMsg('msg-cad-cli','Cadastrado! Código: '+codigo,'ok');
       mostrarLinkCli(res[0]);renderTabelaClientes();
     } else showMsg('msg-cad-cli','Erro ao cadastrar. Verifique os dados.','err');
