@@ -1261,12 +1261,19 @@ async function carregarAgendamentos(){
 function renderFreqGrid(){
   const g=document.getElementById('freq-grid');g.innerHTML='';
   FREQ_OPCOES.forEach(op=>{
+    const ok=currentUser.creditos>=op.freq;
     const b=document.createElement('button');
     b.className='freq-btn'+(op.freq===myFreq?' sel':'');
+    b.disabled=!ok;
     b.textContent=op.label;
-    b.onclick=()=>{myFreq=op.freq;renderFreqGrid();};
+    b.title=ok?'':'Créditos insuficientes';
+    b.onclick=()=>{if(ok){myFreq=op.freq;renderFreqGrid();}};
     g.appendChild(b);
   });
+  if(!FREQ_OPCOES.find(o=>o.freq===myFreq&&currentUser.creditos>=o.freq)){
+    const maxOp=FREQ_OPCOES.filter(o=>currentUser.creditos>=o.freq).slice(-1)[0];
+    if(maxOp){myFreq=maxOp.freq;g.querySelectorAll('.freq-btn').forEach((b,i)=>{b.classList.toggle('sel',FREQ_OPCOES[i].freq===myFreq);});}
+  }
 }
 
 function renderHoraSel(){
@@ -1280,31 +1287,10 @@ async function salvarFrequencia(){
   if(days.length!==myFreq){showMsg('freq-msg','Selecione exatamente '+myFreq+' dia(s).','err');return;}
   const hora=parseInt(document.getElementById('hora-sel').value);
   if(creditosVencidos()){showMsg('freq-msg','Seus créditos venceram em '+fmtData(currentUser.credito_validade)+'. Entre em contato com o estúdio para renovar.','err');return;}
-  const cred=creditos();
-  if(cred<=0){showMsg('freq-msg','Você não possui créditos disponíveis.','err');return;}
-  const ws=getWeekMon(0);
-  const novosSlots=[];
-  let w=0;
-  while(novosSlots.length<cred){
-    const weekStart=new Date(ws);weekStart.setDate(weekStart.getDate()+w*7);
-    const slotsThisWeek=[];
-    days.forEach(d=>{
-      const dt=new Date(weekStart);dt.setDate(dt.getDate()+d-1);
-      if(isHoliday(dt)||isWeekend(dt)) return;
-      const dk=toKey(dt);
-      const sl=getSlot(dk,hora);
-      if(sl.count<MAX) slotsThisWeek.push({date:dk,hour:hora});
-    });
-    if(slotsThisWeek.length===0&&w>52) break;
-    for(const s of slotsThisWeek){
-      if(novosSlots.length>=cred) break;
-      novosSlots.push(s);
-    }
-    w++;
-    if(w>52) break;
-  }
+  if(creditos()<=0){showMsg('freq-msg','Você não possui créditos disponíveis.','err');return;}
   loading(true,'Salvando agendamentos...');
   try{
+    // 1) Cancelar agendamentos futuros e devolver créditos
     const futuros=mySchedule.filter(s=>new Date(s.date+'T'+String(s.hour).padStart(2,'0')+':00')>new Date());
     if(futuros.length>0){
       for(const s of futuros) await sbDelete('agendamentos','id=eq.'+s.id);
@@ -1312,7 +1298,27 @@ async function salvarFrequencia(){
       await sbPatch('clientes','id=eq.'+currentUser.id,{creditos:novosCred});
       currentUser.creditos=novosCred;
     }
-    const res=await sbPost('agendamentos',novosSlots.map(s=>({cliente_codigo:currentUser.codigo,cliente_nome:currentUser.nome,data_slot:s.date,hora:s.hour})));
+    // 2) Capturar créditos disponíveis APÓS a devolução
+    const cred=currentUser.creditos;
+    // 3) Gerar slots futuros semana a semana até esgotar os créditos
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const ws=getWeekMon(0);
+    const novosSlots=[];
+    let w=0;
+    while(novosSlots.length<cred&&w<=52){
+      const weekStart=new Date(ws);weekStart.setDate(weekStart.getDate()+w*7);
+      days.forEach(d=>{
+        if(novosSlots.length>=cred) return;
+        const dt=new Date(weekStart);dt.setDate(dt.getDate()+d-1);
+        if(dt<hoje||isHoliday(dt)||isWeekend(dt)) return;
+        const dk=toKey(dt);
+        const sl=getSlot(dk,hora);
+        if(sl.count<MAX) novosSlots.push({date:dk,hour:hora});
+      });
+      w++;
+    }
+    if(novosSlots.length===0){showMsg('freq-msg','Nenhum horário disponível nos próximos meses.','err');return;}
+    await sbPost('agendamentos',novosSlots.map(s=>({cliente_codigo:currentUser.codigo,cliente_nome:currentUser.nome,data_slot:s.date,hora:s.hour})));
     const credRestantes=currentUser.creditos-novosSlots.length;
     await sbPatch('clientes','id=eq.'+currentUser.id,{creditos:credRestantes});
     currentUser.creditos=credRestantes;
