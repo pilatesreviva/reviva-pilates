@@ -85,6 +85,7 @@ input,select,button,textarea{font-family:var(--font)}
 .badge.cartao{background:var(--blue-dim);color:var(--blue)}
 .badge.dinheiro{background:var(--yellow-dim);color:var(--yellow)}
 .badge.boleto{background:var(--bg3);color:var(--text2)}
+.badge.livre{background:var(--green-dim);color:var(--green)}
 .code-tag{font-family:monospace;font-size:10px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--text2);border:0.5px solid var(--border)}
 .alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;margin-top:10px}
 .alert.ok{background:var(--green-dim);color:var(--green);border:0.5px solid rgba(74,222,128,0.2)}
@@ -294,6 +295,7 @@ input,select,button,textarea{font-family:var(--font)}
             <option value="cartao">Cartão</option>
             <option value="dinheiro">Dinheiro</option>
             <option value="boleto">Boleto</option>
+            <option value="livre">Livre</option>
           </select>
         </div>
       </div>
@@ -730,8 +732,8 @@ const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const ADMIN_SENHA='Reviv4pilates';
 const NETLIFY='https://pilatesreviva.github.io/reviva-pilates';
 const TURNO_LABEL={manha:'Manhã',tarde:'Tarde',todos:'Ambos'};
-const PAG_LABEL={pix:'PIX',cartao:'Cartão',dinheiro:'Dinheiro',boleto:'Boleto'};
-const PAG_CLS={pix:'pix',cartao:'cartao',dinheiro:'dinheiro',boleto:'boleto'};
+const PAG_LABEL={pix:'PIX',cartao:'Cartão',dinheiro:'Dinheiro',boleto:'Boleto',livre:'Livre'};
+const PAG_CLS={pix:'pix',cartao:'cartao',dinheiro:'dinheiro',boleto:'boleto',livre:'livre'};
 const TURNO_CLS={manha:'manha',tarde:'tarde',todos:'admin'};
 const FREQ_OPCOES=[{freq:2,cred:9,label:'2×/sem'},{freq:3,cred:13,label:'3×/sem'},{freq:4,cred:17,label:'4×/sem'},{freq:5,cred:21,label:'5×/sem'}];
 
