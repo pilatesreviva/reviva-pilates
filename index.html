@@ -1296,7 +1296,9 @@ async function salvarFrequencia(){
   if(creditos()<=0){showMsg('freq-msg','Você não possui créditos disponíveis.','err');return;}
   loading(true,'Salvando agendamentos...');
   try{
-    // 1) Cancelar agendamentos futuros e devolver créditos
+    // 1) Recarregar agendamentos para garantir mySchedule atualizado
+    await carregarAgendamentos();
+    // 2) Cancelar agendamentos futuros e devolver créditos
     const futuros=mySchedule.filter(s=>new Date(s.date+'T'+String(s.hour).padStart(2,'0')+':00')>new Date());
     if(futuros.length>0){
       for(const s of futuros) await sbDelete('agendamentos','id=eq.'+s.id);
