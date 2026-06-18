@@ -239,11 +239,11 @@ input,select,button,textarea{font-family:var(--font)}
       </div>
       <div id="fields-colab" style="display:none">
         <div class="field"><label>5 primeiros dígitos do CPF</label><input type="text" id="colab-cpf5" placeholder="12345" maxlength="5" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,5)"></div>
-        <div class="field"><label>Data de nascimento (senha)</label><input type="date" id="colab-nasc-login"></div>
+        <div class="field"><label>Data de nascimento (senha)</label><input type="text" id="colab-nasc-login" placeholder="dd/mm/aaaa" maxlength="10" inputmode="numeric" oninput="mascDataNasc(this)"></div>
       </div>
       <div id="fields-cliente" style="display:none">
         <div class="field"><label>5 primeiros dígitos do CPF</label><input type="text" id="cli-cpf5" placeholder="12345" maxlength="5" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,5)"></div>
-        <div class="field"><label>Data de nascimento (senha)</label><input type="date" id="cli-nasc-login"></div>
+        <div class="field"><label>Data de nascimento (senha)</label><input type="text" id="cli-nasc-login" placeholder="dd/mm/aaaa" maxlength="10" inputmode="numeric" oninput="mascDataNasc(this)"></div>
       </div>
       <button class="btn primary full" onclick="fazerLogin()" style="margin-top:4px"><i class="ti ti-login"></i> Entrar</button>
       <div id="login-msg"></div>
@@ -752,6 +752,7 @@ function getWeekMon(off){const now=new Date();const day=now.getDay();const diff=
 function fmtWeek(mon){const fri=new Date(mon);fri.setDate(fri.getDate()+4);return mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+' – '+fri.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});}
 function iniciais(n){return n.trim().split(' ').filter(Boolean).map(p=>p[0]).join('').toUpperCase().slice(0,2);}
 function fmtNasc(s){if(!s)return '';const p=s.split('-');return p.length===3?p[2]+p[1]+p[0]:s.replace(/\D/g,'');}
+function mascDataNasc(el){let v=el.value.replace(/\D/g,'').slice(0,8);if(v.length>4)v=v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);else if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);el.value=v;}
 function h4t(t){return t==='manha'?HORAS_MANHA:t==='tarde'?HORAS_TARDE:ALL_HORAS;}
 function loading(show,txt='Aguarde...'){document.getElementById('loading').style.display=show?'flex':'none';document.getElementById('loading-text').textContent=txt;}
 function showMsg(id,txt,type){const el=document.getElementById(id);if(el)el.innerHTML=txt?`<div class="alert ${type}">${txt}</div>`:'';}
