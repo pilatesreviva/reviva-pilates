@@ -1474,8 +1474,7 @@ async function initPresencas(){
       if(!sl.agendamentos) sl.agendamentos=[];
       sl.agendamentos.push({nome:r.cliente_nome,codigo:r.cliente_codigo});
     });
-    const clis=await sbGet('clientes','select=codigo,observacoes&observacoes=not.is.null');
-    (clis||[]).forEach(c=>{if(c.observacoes)_obsMap[c.codigo]=c.observacoes;});
+    try{const clis=await sbGet('clientes','select=codigo,observacoes');if(Array.isArray(clis))clis.forEach(c=>{if(c.observacoes)_obsMap[c.codigo]=c.observacoes;});}catch(e){}
     const pres=await sbGet('presencas',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}`);
     presencasMap={};
     if(pres) pres.forEach(p=>{presencasMap[`${p.data_slot}_${p.hora}_${p.tipo}_${p.codigo}`]=p.status;});
