@@ -515,7 +515,7 @@ input,select,button,textarea{font-family:var(--font)}
           <select id="edit-col-turno">
             <option value="manha">Manhã</option>
             <option value="tarde">Tarde</option>
-            <option value="ambos">Ambos</option>
+            <option value="todos">Ambos</option>
           </select>
         </div>
         <div class="field"><label>Status</label>
@@ -1569,19 +1569,22 @@ function setPresenca(ck,tipo,codigo,val){presencasMap[`${ck}_${tipo}_${codigo}`]
 async function salvarPresencas(){
   loading(true,'Salvando...');
   try{
-    const upserts=Object.entries(presencasMap).map(([k,status])=>{
+    const registros=Object.entries(presencasMap).map(([k,status])=>{
       const parts=k.split('_');
-      const data_slot=parts[0];
-      const hora=parseInt(parts[1]);
-      const tipo=parts[2];
-      const codigo=parts.slice(3).join('_');
-      return{data_slot,hora,tipo,codigo,status};
+      return{data_slot:parts[0],hora:parseInt(parts[1]),tipo:parts[2],codigo:parts.slice(3).join('_'),status};
     }).filter(r=>r.status);
-    if(upserts.length>0) await sbUpsert('presencas',upserts);
+    if(registros.length>0){
+      const ws=getWeekMon(wkOff.col);
+      const we=new Date(ws);we.setDate(we.getDate()+6);
+      await sbDelete('presencas',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}&tipo=eq.aluno`);
+      const res=await sbPost('presencas',registros);
+      if(res&&res.message){showMsg('msg-presenca-err',res.message,'err');return;}
+    }
     renderPresencas();
     document.getElementById('msg-presenca').textContent='Salvo!';
     setTimeout(()=>document.getElementById('msg-presenca').textContent='',2500);
-  } finally{loading(false);}
+  } catch(e){alert('Erro ao salvar: '+e.message);}
+  finally{loading(false);}
 }
 
 async function initVagas(){
