@@ -491,6 +491,9 @@ input,select,button,textarea{font-family:var(--font)}
             </select>
           </div>
         </div>
+        <div class="field"><label>Observações <span style="font-size:10px;color:var(--text3)">(visível apenas para admin e colaboradoras)</span></label>
+          <textarea id="edit-cli-obs" rows="3" style="width:100%;resize:vertical;font-family:var(--font);font-size:12px;padding:8px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text)" placeholder="Anotações sobre lesões, preferências, limitações..."></textarea>
+        </div>
         <div id="msg-edit-cli" style="margin-top:8px;font-size:12px"></div>
         <div class="modal-footer">
           <button class="btn" onclick="fecharModalEditCli()">Cancelar</button>
@@ -1038,12 +1041,13 @@ function mostrarLinkCli(cli){
 }
 
 const _cliCache={};
+const _obsMap={};
 async function renderTabelaClientes(){
   loading(true,'Carregando...');
   try{
     const busca=(document.getElementById('busca-cli')?.value||'').toLowerCase();
     const rows=await sbGet('clientes','order=nome.asc');
-    (rows||[]).forEach(c=>{_cliCache[c.id]=c;});
+    (rows||[]).forEach(c=>{_cliCache[c.id]=c;if(c.observacoes)_obsMap[c.codigo]=c.observacoes;});
     const f=(rows||[]).filter(c=>!busca||c.nome.toLowerCase().includes(busca)||c.codigo.toLowerCase().includes(busca));
     document.getElementById('total-cli').textContent='('+f.length+')';
     document.getElementById('tbody-cli').innerHTML=f.length===0
@@ -1163,6 +1167,7 @@ function editarCliente(id){
   document.getElementById('edit-cli-freq').value=c.frequencia||'';
   document.getElementById('edit-cli-validade').value=c.credito_validade||'';
   document.getElementById('edit-cli-ativo').value=String(c.ativo!==false);
+  document.getElementById('edit-cli-obs').value=c.observacoes||'';
   document.getElementById('msg-edit-cli').textContent='';
   document.getElementById('modal-edit-cli').classList.add('open');
 }
@@ -1182,7 +1187,8 @@ async function salvarEdicaoCli(){
     creditos:parseInt(document.getElementById('edit-cli-cred').value)||0,
     frequencia:parseInt(document.getElementById('edit-cli-freq').value)||null,
     credito_validade:document.getElementById('edit-cli-validade').value||null,
-    ativo:document.getElementById('edit-cli-ativo').value==='true'
+    ativo:document.getElementById('edit-cli-ativo').value==='true',
+    observacoes:document.getElementById('edit-cli-obs').value.trim()||null
   };
   loading(true,'Salvando...');
   try{
@@ -1468,6 +1474,8 @@ async function initPresencas(){
       if(!sl.agendamentos) sl.agendamentos=[];
       sl.agendamentos.push({nome:r.cliente_nome,codigo:r.cliente_codigo});
     });
+    const clis=await sbGet('clientes','select=codigo,observacoes&observacoes=not.is.null');
+    (clis||[]).forEach(c=>{if(c.observacoes)_obsMap[c.codigo]=c.observacoes;});
     const pres=await sbGet('presencas',`data_slot=gte.${toKey(ws)}&data_slot=lte.${toKey(we)}`);
     presencasMap={};
     if(pres) pres.forEach(p=>{presencasMap[`${p.data_slot}_${p.hora}_${p.tipo}_${p.codigo}`]=p.status;});
@@ -1553,7 +1561,7 @@ function renderPresencas(){
       <td style="white-space:nowrap">${fmt}</td>
       <td style="cursor:pointer;color:var(--accent);text-decoration:underline" onclick="mostrarClientesSlot('${r.date}',${r.hour})" title="Ver todos do horário">${String(r.hour).padStart(2,'0')}h</td>
       <td><span class="badge ${r.isManha?'manha':'tarde'}" style="font-size:9px">${r.isManha?'TH':'RE'}</span></td>
-      <td style="font-size:11px;font-weight:500">${r.nome}</td>
+      <td style="font-size:11px;font-weight:500">${r.nome}${_obsMap[r.codigo]?`<div style="font-size:10px;color:var(--text3);margin-top:2px;font-style:italic">${_obsMap[r.codigo]}</div>`:''}</td>
       <td><select class="status-sel" onchange="setPresenca('${r.date}_${r.hour}','aluno','${r.codigo}',this.value)">
         <option value="" ${sv===''?'selected':''}>—</option>
         <option value="P" ${sv==='P'?'selected':''}>P</option>
