@@ -1560,7 +1560,20 @@ function renderPresencas(){
       <td style="white-space:nowrap">${fmt}</td>
       <td style="cursor:pointer;color:var(--accent);text-decoration:underline" onclick="mostrarClientesSlot('${r.date}',${r.hour})" title="Ver todos do horário">${String(r.hour).padStart(2,'0')}h</td>
       <td><span class="badge ${r.isManha?'manha':'tarde'}" style="font-size:9px">${r.isManha?'TH':'RE'}</span></td>
-      <td style="font-size:11px;font-weight:500">${r.nome}${_obsMap[r.codigo]?`<div style="font-size:10px;color:var(--text3);margin-top:2px;font-style:italic">${_obsMap[r.codigo]}</div>`:''}</td>
+      <td style="font-size:11px;font-weight:500">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span>${r.nome}</span>
+          <button onclick="editarObs('${r.codigo}','${r.date}',${r.hour})" title="Editar observação" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:0;font-size:13px"><i class="ti ti-pencil"></i></button>
+        </div>
+        ${_obsMap[r.codigo]?`<div id="obs-disp-${r.codigo}-${r.date}-${r.hour}" style="font-size:10px;color:var(--text3);margin-top:2px;font-style:italic">${_obsMap[r.codigo]}</div>`:`<div id="obs-disp-${r.codigo}-${r.date}-${r.hour}" style="display:none"></div>`}
+        <div id="obs-form-${r.codigo}-${r.date}-${r.hour}" style="display:none;margin-top:6px">
+          <textarea id="obs-txt-${r.codigo}-${r.date}-${r.hour}" rows="2" style="width:100%;font-family:var(--font);font-size:11px;padding:6px;border:0.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg2);color:var(--text);resize:vertical">${_obsMap[r.codigo]||''}</textarea>
+          <div style="display:flex;gap:6px;margin-top:4px">
+            <button class="btn sm primary" onclick="salvarObs('${r.codigo}','${r.date}',${r.hour})">Salvar</button>
+            <button class="btn sm" onclick="editarObs('${r.codigo}','${r.date}',${r.hour})">Cancelar</button>
+          </div>
+        </div>
+      </td>
       <td><select class="status-sel" onchange="setPresenca('${r.date}_${r.hour}','aluno','${r.codigo}',this.value)">
         <option value="" ${sv===''?'selected':''}>—</option>
         <option value="P" ${sv==='P'?'selected':''}>P</option>
@@ -1573,6 +1586,27 @@ function renderPresencas(){
 
 function setPresenca(ck,tipo,codigo,val){presencasMap[`${ck}_${tipo}_${codigo}`]=val;}
 
+function editarObs(codigo,date,hour){
+  const uid=`${codigo}-${date}-${hour}`;
+  const f=document.getElementById('obs-form-'+uid);
+  if(!f) return;
+  const open=f.style.display==='none';
+  f.style.display=open?'block':'none';
+  if(open){const ta=document.getElementById('obs-txt-'+uid);if(ta)ta.focus();}
+}
+async function salvarObs(codigo,date,hour){
+  const uid=`${codigo}-${date}-${hour}`;
+  const ta=document.getElementById('obs-txt-'+uid);
+  if(!ta) return;
+  const val=ta.value.trim()||null;
+  try{
+    await sbPatch('clientes','codigo=eq.'+codigo,{observacoes:val});
+    _obsMap[codigo]=val||'';
+    document.getElementById('obs-form-'+uid).style.display='none';
+    const disp=document.getElementById('obs-disp-'+uid);
+    if(disp){disp.textContent=val||'';disp.style.display=val?'':'none';}
+  } catch(e){alert('Erro ao salvar observação: '+e.message);}
+}
 async function salvarPresencas(){
   loading(true,'Salvando...');
   try{
