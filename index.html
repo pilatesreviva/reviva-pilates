@@ -1558,6 +1558,13 @@ function renderPresencas(){
       }
     });
   }
+  rows.sort((a,b)=>{
+    const sa=presencasMap[`${a.date}_${a.hour}_aluno_${a.codigo}`]||'';
+    const sb=presencasMap[`${b.date}_${b.hour}_aluno_${b.codigo}`]||'';
+    const pa=sa?1:0,pb=sb?1:0;
+    if(pa!==pb) return pa-pb;
+    return a.date.localeCompare(b.date)||a.hour-b.hour;
+  });
   const isAdmin=currentUser.tipo==='admin';
   const horasPermitidas=new Set(horasVisiveis);
   let totalP=0,totalF=0,totalFJ=0;
