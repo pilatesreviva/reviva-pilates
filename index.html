@@ -1972,6 +1972,14 @@ async function agendarExperimental(){
   const obs=document.getElementById('exp-obs').value.trim();
   if(!nome||!tel){showMsg('msg-exp','Nome e telefone são obrigatórios.','err');return;}
   if(!data||isNaN(hora)){showMsg('msg-exp','Selecione um horário na grade abaixo.','err');return;}
+  const dtExp=new Date(data+'T12:00');
+  if(isWeekend(dtExp)){showMsg('msg-exp','Não é possível agendar aos finais de semana.','err');return;}
+  if(isHoliday(dtExp)){showMsg('msg-exp','Esta data é feriado.','err');return;}
+  if(isBlocked4h(data,hora)){showMsg('msg-exp','Mínimo de 4 horas de antecedência para o agendamento.','err');return;}
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  if(dtExp<hoje){showMsg('msg-exp','Não é possível agendar em datas passadas.','err');return;}
+  const sl=getSlot(data,hora);
+  if(sl.count>=MAX){showMsg('msg-exp','Esta vaga está lotada.','err');return;}
   loading(true,'Agendando experimental...');
   try{
     const body={nome,telefone:tel,data_slot:data,hora,observacao:obs,status:'agendado'};
